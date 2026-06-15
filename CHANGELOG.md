@@ -9,25 +9,50 @@
 
 ## [0.18.100] - 2026-06-15
 
-### 重大修复
+### 重大功能（让 Rime 更易用）
 
-#### Shift 中英文切换
-- **修复 Shift 单独释放切换后的"反弹"**：1.5s 锁窗口内持续 force-sync，不再因第一次确认匹配而立即清空 lock
-  - `Composition.cpp::WeaselTSF::_AfterRimeKey`：新增 `within_lock_window` 判定
-  - `EditSession.cpp`：同步应用相同逻辑
-  - `WeaselTSF::_Reconnect`：IPC 重连时清空锁状态
+#### 快速设置栏（Quick Settings Bar）
+- 新增可视化快速设置栏（`WeaselServer/TrayQuickBar.*`）
+- **Alt + ,** 快捷键调出，托盘区"词典"按钮也可进入
+- 内含：快捷键设置、方案切换设置、UI 风格设置、固定短语、常用短语、词典管理等
 
-#### 性能与稳定性
-- **VEH Crash 日志节流**（`WeaselCrashDiag.h`）：
-  - 线程级：每 1000ms 最多 1 次
-  - 全局级：每 500ms 最多 1 次
-  - 真实崩溃（access violation 等）不受节流影响
-  - 实测：`weasel.crash.log` 1 小时增长 < 1MB（原 92MB）
+#### 内置双拼方案
+- 在内置方案中新增 7 套双拼方案：`output/data/double_pinyin*.schema.yaml`
+- 包括：小鹤双拼（flypy）、微软双拼（mspy）、搜狗双拼（sogou）、智能 ABC、加加、紫光、自然码
+
+#### 自定义固定短语可视化编辑
+- `WeaselDeployer/CustomPhraseDialog.*`、`CustomPhraseListDialog.*`
+- 可视化增删改，支持快捷导入/导出
+
+#### 常用短语（可视化 + 快捷调用）
+- `WeaselServer/TrayCommonPhrasePanel.*`、`WeaselDeployer/CommonPhraseEditDialog.*`
+- **Alt + .** 调出，鼠标双击或方向键 + 回车上屏
+
+#### 快捷键可视化设置
+- `WeaselDeployer/HotkeySettingsDialog.*`、`KeyCaptureEdit.*`
+- 图形化重新绑定常用快捷键
+
+#### Shift 中英文 / 中英文标点切换
+- `include/ShiftComboGuard.h`、`WeaselTSF/Composition.cpp`、`WeaselTSF/KeyEvent.cpp`
+- Shift 单独松开切换中英（或在标点模式下切换中英标点）
+- 修复"切到英文后第一个键又被翻回中文"的问题：1.5s 锁窗口内持续 force-sync
+
+### 稳定性改进
+
+#### TSF 多宿主异常防御
+- `include/WeaselEditSessionSafe.h`、`WeaselTSFCallbackSafe.h`
+- 钉钉 / 飞书 / 微信 / Cursor 等宿主下 C++ 异常不再传播
+
+#### VEH Crash 日志节流
+- `include/WeaselCrashDiag.h`
+- 线程级每 1000ms 最多 1 次；全局级每 500ms 最多 1 次
+- 真实崩溃不受节流影响
+- 实测：`weasel.crash.log` 1 小时增长 < 1MB（原 92MB）
 
 #### 安装器强化
 - Restart Manager 强制关闭持有 DLL 句柄的进程
 - `Delete /REBOOTOK` 兜底覆盖所有 DLL/IME/exe
-- `weasel.crash.log` 64MB 自动轮转（新增）
+- `weasel.crash.log` 64MB 自动轮转
 
 ---
 
