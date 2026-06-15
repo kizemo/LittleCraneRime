@@ -1,0 +1,944 @@
+﻿#include "stdafx.h"
+#include <string>
+#include <vector>
+#include <msctf.h>
+#include <strsafe.h>
+#include <StringAlgorithm.hpp>
+#include <WeaselConstants.h>
+#include <WeaselUtility.h>
+#include <WeaselFileLog.h>
+#include "InstallOptionsDlg.h"
+#include "process_closer.h"
+
+// {A3F4CDED-B1E9-41EE-9CA6-7B4D0DE6CB0A}
+static const GUID c_clsidTextService = {
+    0xa3f4cded,
+    0xb1e9,
+    0x41ee,
+    {0x9c, 0xa6, 0x7b, 0x4d, 0xd, 0xe6, 0xcb, 0xa}};
+
+// {3D02CAB6-2B8E-4781-BA20-1C9267529467}
+static const GUID c_guidProfile = {
+    0x3d02cab6,
+    0x2b8e,
+    0x4781,
+    {0xba, 0x20, 0x1c, 0x92, 0x67, 0x52, 0x94, 0x67}};
+
+// if in the future, option hant is extended, maybe a function to generate this
+// info is required
+#define PSZTITLE_HANS                                                     \
+  L"0804:{A3F4CDED-B1E9-41EE-9CA6-7B4D0DE6CB0A}{3D02CAB6-2B8E-4781-BA20-" \
+  L"1C9267529467}"
+#define PSZTITLE_HANT                                                     \
+  L"0404:{A3F4CDED-B1E9-41EE-9CA6-7B4D0DE6CB0A}{3D02CAB6-2B8E-4781-BA20-" \
+  L"1C9267529467}"
+#define ILOT_UNINSTALL 0x00000001
+typedef HRESULT(WINAPI* PTF_INSTALLLAYOUTORTIP)(LPCWSTR psz, DWORD dwFlags);
+
+#define WEASEL_WER_KEY                            \
+  L"SOFTWARE\\Microsoft\\Windows\\Windows Error " \
+  L"Reporting\\LocalDumps\\WeaselServer.exe"
+
+// Try once to release locks on `dest` by closing any non-critical process
+// currently holding it. Called when CopyFileW fails with a sharing violation.
+// We only run the pipeline once per copy_file() call to avoid making the
+// user wait forever in pathological cases - the surrounding retry loop
+// handles the rest.
+static bool try_release_locks_on_dest(const std::wstring& dest) {
+  std::vector<weasel_setup::HoldingProcess> holders;
+  if (!weasel_setup::FindProcessesHoldingFile(dest, &holders))
+    return false;
+  if (holders.empty())
+    return true;  // nothing holding it; CopyFileW will succeed next try
+
+  wchar_t buf[512];
+  swprintf_s(buf, L"copy_file: %s locked by %u process(es)",
+             dest.c_str(), (unsigned)holders.size());
+  WeaselAppendLogW(L"install.log", L"setup", buf);
+
+  // 8 second grace period: long enough for editors to flush "do you want to
+  // save?" prompts, short enough that an unattended install doesn't hang.
+  const auto outcome = weasel_setup::CloseProcessesHoldingFile(
+      dest, 8000, nullptr);
+
+  swprintf_s(buf, L"copy_file: close outcome=%d for %s",
+             (int)outcome, dest.c_str());
+  WeaselAppendLogW(L"install.log", L"setup", buf);
+
+  return outcome == weasel_setup::CloseOutcome::kClosedAll ||
+         outcome == weasel_setup::CloseOutcome::kAlreadyFree;
+}
+
+BOOL copy_file(const std::wstring& src, const std::wstring& dest) {
+  bool locks_released = false;
+  for (int attempt = 0; attempt < 20; ++attempt) {
+    if (CopyFileW(src.c_str(), dest.c_str(), FALSE))
+      return TRUE;
+
+    const DWORD err = GetLastError();
+
+    // First failure with a sharing violation: try to politely close the
+    // holders. Subsequent failures just retry with the existing sleep, in
+    // case the user is still being prompted to save.
+    if (!locks_released &&
+        (err == ERROR_SHARING_VIOLATION || err == ERROR_LOCK_VIOLATION)) {
+      wchar_t buf[256];
+      swprintf_s(buf, L"copy_file: %s sharing violation err=%lu, "
+                       L"attempting auto-close of holders",
+                 dest.c_str(), err);
+      WeaselAppendLogW(L"install.log", L"setup", buf);
+      locks_released = try_release_locks_on_dest(dest);
+      if (locks_released) {
+        if (CopyFileW(src.c_str(), dest.c_str(), FALSE))
+          return TRUE;
+      }
+    }
+
+    for (int i = 0; i < 10; ++i) {
+      std::wstring old = dest + L".old." + std::to_wstring(i);
+      if (MoveFileExW(dest.c_str(), old.c_str(), MOVEFILE_REPLACE_EXISTING)) {
+        MoveFileExW(old.c_str(), NULL, MOVEFILE_DELAY_UNTIL_REBOOT);
+        break;
+      }
+    }
+    if (CopyFileW(src.c_str(), dest.c_str(), FALSE))
+      return TRUE;
+    Sleep(500);
+  }
+  wchar_t buf[256];
+  swprintf_s(buf, L"copy_file failed src=%s dst=%s err=%lu", src.c_str(),
+             dest.c_str(), GetLastError());
+  WeaselAppendLogW(L"install.log", L"setup", buf);
+  return FALSE;
+}
+
+static std::wstring native_system32_file(const std::wstring& name) {
+  WCHAR windir[MAX_PATH] = {};
+  GetWindowsDirectoryW(windir, _countof(windir));
+  return std::wstring(windir) + L"\\System32\\" + name;
+}
+
+static std::wstring syswow64_file(const std::wstring& name) {
+  // GetSystemDirectoryW() returns native System32 when the 32-bit process is
+  // elevated; always resolve SysWOW64 explicitly on WoW64 hosts.
+  WCHAR syswow[MAX_PATH] = {};
+  const UINT len = GetSystemWow64DirectoryW(syswow, _countof(syswow));
+  if (len > 0 && len < _countof(syswow))
+    return std::wstring(syswow) + L"\\" + name;
+  WCHAR sys[MAX_PATH] = {};
+  GetSystemDirectoryW(sys, _countof(sys));
+  return std::wstring(sys) + L"\\" + name;
+}
+
+BOOL delete_file(const std::wstring& file) {
+  BOOL ret = DeleteFile(file.c_str());
+  if (!ret) {
+    for (int i = 0; i < 10; ++i) {
+      std::wstring old = file + L".old." + std::to_wstring(i);
+      if (MoveFileEx(file.c_str(), old.c_str(), MOVEFILE_REPLACE_EXISTING)) {
+        MoveFileEx(old.c_str(), NULL, MOVEFILE_DELAY_UNTIL_REBOOT);
+        return TRUE;
+      }
+    }
+  }
+  return ret;
+}
+
+typedef BOOL(WINAPI* PISWOW64P2)(HANDLE, USHORT*, USHORT*);
+BOOL is_arm64_machine() {
+  PISWOW64P2 fnIsWow64Process2 = (PISWOW64P2)GetProcAddress(
+      GetModuleHandle(_T("kernel32.dll")), "IsWow64Process2");
+
+  if (fnIsWow64Process2 == NULL) {
+    return FALSE;
+  }
+
+  USHORT processMachine;
+  USHORT nativeMachine;
+
+  if (!fnIsWow64Process2(GetCurrentProcess(), &processMachine,
+                         &nativeMachine)) {
+    return FALSE;
+  }
+  return nativeMachine == IMAGE_FILE_MACHINE_ARM64;
+}
+
+typedef HRESULT(WINAPI* PISWOWGMS)(USHORT, BOOL*);
+typedef UINT(WINAPI* PGSW64DIR2)(LPWSTR, UINT, WORD);
+INT get_wow_arm32_system_dir(LPWSTR lpBuffer, UINT uSize) {
+  PISWOWGMS fnIsWow64GuestMachineSupported = (PISWOWGMS)GetProcAddress(
+      GetModuleHandle(_T("kernel32.dll")), "IsWow64GuestMachineSupported");
+  PGSW64DIR2 fnGetSystemWow64Directory2W = (PGSW64DIR2)GetProcAddress(
+      GetModuleHandle(_T("kernelbase.dll")), "GetSystemWow64Directory2W");
+
+  if (fnIsWow64GuestMachineSupported == NULL ||
+      fnGetSystemWow64Directory2W == NULL) {
+    return 0;
+  }
+
+  BOOL supported;
+  if (fnIsWow64GuestMachineSupported(IMAGE_FILE_MACHINE_ARMNT, &supported) !=
+      S_OK) {
+    return 0;
+  }
+
+  if (!supported) {
+    return 0;
+  }
+
+  return fnGetSystemWow64Directory2W(lpBuffer, uSize, IMAGE_FILE_MACHINE_ARMNT);
+}
+
+typedef int (*ime_register_func)(const std::wstring& ime_path,
+                                 bool register_ime,
+                                 bool is_wow64,
+                                 bool is_wowarm,
+                                 bool hant,
+                                 bool silent);
+
+int install_ime_file(std::wstring& srcPath,
+                     const std::wstring& ext,
+                     bool hant,
+                     bool silent,
+                     ime_register_func func) {
+  WCHAR path[MAX_PATH];
+  GetModuleFileNameW(GetModuleHandle(NULL), path, _countof(path));
+
+  std::wstring srcFileName = L"weasel";
+
+  srcFileName += ext;
+  WCHAR drive[_MAX_DRIVE];
+  WCHAR dir[_MAX_DIR];
+  _wsplitpath_s(path, drive, _countof(drive), dir, _countof(dir), NULL, 0, NULL,
+                0);
+  srcPath = std::wstring(drive) + dir + srcFileName;
+
+  const std::wstring install_dir = std::wstring(drive) + dir;
+  const std::wstring destWowPath = syswow64_file(L"weasel" + ext);
+
+  int retval = 0;
+  // 32-bit weasel.dll/.ime -> SysWOW64 (do not overwrite with x64 payload)
+  if (!copy_file(srcPath, destWowPath)) {
+    MSG_NOT_SILENT_ID_CAP(silent, destWowPath.c_str(), IDS_STR_INSTALL_FAILED,
+                          MB_ICONERROR | MB_OK);
+    return 1;
+  }
+  retval += func(destWowPath, true, false, false, hant, silent);
+  if (is_wow64()) {
+    PVOID OldValue = NULL;
+    if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+      MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_ERRCANCELFSREDIRECT,
+                            IDS_STR_INSTALL_FAILED, MB_ICONERROR | MB_OK);
+      return 1;
+    }
+
+    const std::wstring destNativePath = native_system32_file(L"weasel" + ext);
+
+    if (is_arm64_machine()) {
+      WCHAR sysarm32[MAX_PATH];
+      if (get_wow_arm32_system_dir(sysarm32, _countof(sysarm32)) > 0) {
+        // Install the ARM32 version if ARM32 WOW is supported （lower than
+        // Windows 11 24H2).
+        std::wstring srcPathARM32 = srcPath;
+        ireplace_last(srcPathARM32, ext, L"ARM" + ext);
+
+        std::wstring destPathARM32 = std::wstring(sysarm32) + L"\\weasel" + ext;
+        if (!copy_file(srcPathARM32, destPathARM32)) {
+          MSG_NOT_SILENT_ID_CAP(silent, destPathARM32.c_str(),
+                                IDS_STR_INSTALL_FAILED, MB_ICONERROR | MB_OK);
+          return 1;
+        }
+        retval += func(destPathARM32, true, true, true, hant, silent);
+      }
+
+      // Then install the ARM64 (and x64) version.
+      // On ARM64 weasel.dll(ime) is an ARM64X redirection DLL (weaselARM64X).
+      // When loaded, it will be redirected to weaselARM64.dll(ime) on ARM64
+      // processes, and weaselx64.dll(ime) on x64 processes. So we need a total
+      // of three files.
+
+      std::wstring srcPathX64 = install_dir + L"weaselx64" + ext;
+      std::wstring destPathX64 = native_system32_file(L"weaselx64" + ext);
+      if (!copy_file(srcPathX64, destPathX64)) {
+        MSG_NOT_SILENT_ID_CAP(silent, destPathX64.c_str(),
+                              IDS_STR_INSTALL_FAILED, MB_ICONERROR | MB_OK);
+        if (Wow64RevertWow64FsRedirection(OldValue) == FALSE) {}
+        return 1;
+      }
+
+      std::wstring srcPathARM64 = install_dir + L"weaselARM64" + ext;
+      std::wstring destPathARM64 = native_system32_file(L"weaselARM64" + ext);
+      if (!copy_file(srcPathARM64, destPathARM64)) {
+        MSG_NOT_SILENT_ID_CAP(silent, destPathARM64.c_str(),
+                              IDS_STR_INSTALL_FAILED, MB_ICONERROR | MB_OK);
+        if (Wow64RevertWow64FsRedirection(OldValue) == FALSE) {}
+        return 1;
+      }
+
+      srcPath = install_dir + L"weaselARM64X" + ext;
+    } else {
+      srcPath = install_dir + L"weaselx64" + ext;
+    }
+
+    if (!copy_file(srcPath, destNativePath)) {
+      MSG_NOT_SILENT_ID_CAP(silent, destNativePath.c_str(), IDS_STR_INSTALL_FAILED,
+                            MB_ICONERROR | MB_OK);
+      if (Wow64RevertWow64FsRedirection(OldValue) == FALSE) {}
+      return 1;
+    }
+    if (!is_arm64_machine()) {
+      const std::wstring destX64Side =
+          native_system32_file(L"weaselx64" + ext);
+      copy_file(srcPath, destX64Side);
+    }
+    retval += func(destNativePath, true, true, false, hant, silent);
+    if (Wow64RevertWow64FsRedirection(OldValue) == FALSE) {
+      MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_ERRRECOVERFSREDIRECT,
+                            IDS_STR_INSTALL_FAILED, MB_ICONERROR | MB_OK);
+      return 1;
+    }
+  }
+  return retval;
+}
+
+int uninstall_ime_file(const std::wstring& ext,
+                       bool silent,
+                       ime_register_func func) {
+  int retval = 0;
+  WCHAR path[MAX_PATH];
+  GetSystemDirectoryW(path, _countof(path));
+  std::wstring imePath(path);
+  imePath += L"\\weasel" + ext;
+  retval += func(imePath, false, false, false, false, silent);
+  delete_file(imePath);
+  if (is_wow64()) {
+    retval += func(imePath, false, true, false, false, silent);
+    PVOID OldValue = NULL;
+    if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+      MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_ERRCANCELFSREDIRECT,
+                            IDS_STR_UNINSTALL_FAILED, MB_ICONERROR | MB_OK);
+      return 1;
+    }
+
+    if (is_arm64_machine()) {
+      WCHAR sysarm32[MAX_PATH];
+      if (get_wow_arm32_system_dir(sysarm32, _countof(sysarm32)) > 0) {
+        std::wstring imePathARM32 = std::wstring(sysarm32) + L"\\weasel" + ext;
+        retval += func(imePathARM32, false, true, true, false, silent);
+        delete_file(imePathARM32);
+      }
+
+      std::wstring imePathX64 = imePath;
+      ireplace_last(imePathX64, ext, L"x64" + ext);
+      delete_file(imePathX64);
+
+      std::wstring imePathARM64 = imePath;
+      ireplace_last(imePathARM64, ext, L"ARM64" + ext);
+      delete_file(imePathARM64);
+    }
+
+    delete_file(imePath);
+    if (Wow64RevertWow64FsRedirection(OldValue) == FALSE) {
+      MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_ERRRECOVERFSREDIRECT,
+                            IDS_STR_UNINSTALL_FAILED, MB_ICONERROR | MB_OK);
+      return 1;
+    }
+  }
+  return retval;
+}
+
+// 注册IME输入法
+int register_ime(const std::wstring& ime_path,
+                 bool register_ime,
+                 bool is_wow64,
+                 bool is_wowarm,
+                 bool hant,
+                 bool silent) {
+  if (is_wow64) {
+    return 0;  // only once
+  }
+
+  const WCHAR KEYBOARD_LAYOUTS_KEY[] =
+      L"SYSTEM\\CurrentControlSet\\Control\\Keyboard Layouts";
+  const WCHAR PRELOAD_KEY[] = L"Keyboard Layout\\Preload";
+
+  if (register_ime) {
+    HKL hKL = ImmInstallIME(ime_path.c_str(), get_weasel_ime_name().c_str());
+    if (!hKL) {
+      // manually register ime
+      WCHAR hkl_str[16] = {0};
+      HKEY hKey;
+      LSTATUS ret = RegOpenKey(HKEY_LOCAL_MACHINE, KEYBOARD_LAYOUTS_KEY, &hKey);
+      if (ret == ERROR_SUCCESS) {
+        for (DWORD k = 0xE0200000 + (hant ? 0x0404 : 0x0804); k <= 0xE0FF0804;
+             k += 0x10000) {
+          StringCchPrintfW(hkl_str, _countof(hkl_str), L"%08X", k);
+          HKEY hSubKey;
+          ret = RegOpenKey(hKey, hkl_str, &hSubKey);
+          if (ret == ERROR_SUCCESS) {
+            WCHAR imeFile[32] = {0};
+            DWORD len = sizeof(imeFile);
+            DWORD type = 0;
+            ret = RegQueryValueEx(hSubKey, L"Ime File", NULL, &type,
+                                  (LPBYTE)imeFile, &len);
+            if (ret = ERROR_SUCCESS) {
+              if (_wcsicmp(imeFile, L"weasel.ime") == 0) {
+                hKL = (HKL)k;  // already there
+              }
+            }
+            RegCloseKey(hSubKey);
+          } else {
+            // found a spare number to register
+            ret = RegCreateKey(hKey, hkl_str, &hSubKey);
+            if (ret == ERROR_SUCCESS) {
+              const WCHAR ime_file[] = L"weasel.ime";
+              RegSetValueEx(hSubKey, L"Ime File", 0, REG_SZ, (LPBYTE)ime_file,
+                            sizeof(ime_file));
+              const WCHAR layout_file[] = L"kbdus.dll";
+              RegSetValueEx(hSubKey, L"Layout File", 0, REG_SZ,
+                            (LPBYTE)layout_file, sizeof(layout_file));
+              const std::wstring layout_text = get_weasel_ime_name();
+              RegSetValueEx(hSubKey, L"Layout Text", 0, REG_SZ,
+                            (LPBYTE)layout_text.c_str(),
+                            layout_text.size() * sizeof(wchar_t));
+              RegCloseKey(hSubKey);
+              hKL = (HKL)k;
+            }
+            break;
+          }
+        }
+        RegCloseKey(hKey);
+      }
+      if (hKL) {
+        HKEY hPreloadKey;
+        ret = RegOpenKey(HKEY_CURRENT_USER, PRELOAD_KEY, &hPreloadKey);
+        if (ret == ERROR_SUCCESS) {
+          for (size_t i = 1; true; ++i) {
+            std::wstring number = std::to_wstring(i);
+            DWORD type = 0;
+            WCHAR value[32];
+            DWORD len = sizeof(value);
+            ret = RegQueryValueEx(hPreloadKey, number.c_str(), 0, &type,
+                                  (LPBYTE)value, &len);
+            if (ret != ERROR_SUCCESS) {
+              RegSetValueEx(hPreloadKey, number.c_str(), 0, REG_SZ,
+                            (const BYTE*)hkl_str,
+                            (wcslen(hkl_str) + 1) * sizeof(WCHAR));
+              break;
+            }
+          }
+          RegCloseKey(hPreloadKey);
+        }
+      }
+    }
+    if (!hKL) {
+      DWORD dwErr = GetLastError();
+      WCHAR msg[100];
+      CString str;
+      str.LoadStringW(IDS_STR_ERRREGIME);
+      StringCchPrintfW(msg, _countof(msg), str, hKL, dwErr);
+      MSG_NOT_SILENT_ID_CAP(silent, msg, IDS_STR_INSTALL_FAILED,
+                            MB_ICONERROR | MB_OK);
+      return 1;
+    }
+    return 0;
+  }
+
+  // unregister ime
+
+  HKEY hKey;
+  LSTATUS ret = RegOpenKey(HKEY_LOCAL_MACHINE, KEYBOARD_LAYOUTS_KEY, &hKey);
+  if (ret != ERROR_SUCCESS) {
+    MSG_NOT_SILENT_ID_CAP(silent, KEYBOARD_LAYOUTS_KEY,
+                          IDS_STR_UNINSTALL_FAILED, MB_ICONERROR | MB_OK);
+    return 1;
+  }
+
+  for (int i = 0; true; ++i) {
+    WCHAR subKey[16];
+    ret = RegEnumKey(hKey, i, subKey, _countof(subKey));
+    if (ret != ERROR_SUCCESS)
+      break;
+
+    // 中文键盘布局?
+    if (wcscmp(subKey + 4, L"0804") == 0 || wcscmp(subKey + 4, L"0404") == 0) {
+      HKEY hSubKey;
+      ret = RegOpenKey(hKey, subKey, &hSubKey);
+      if (ret != ERROR_SUCCESS)
+        continue;
+
+      WCHAR imeFile[32];
+      DWORD len = sizeof(imeFile);
+      DWORD type = 0;
+      ret = RegQueryValueEx(hSubKey, L"Ime File", NULL, &type, (LPBYTE)imeFile,
+                            &len);
+      RegCloseKey(hSubKey);
+      if (ret != ERROR_SUCCESS)
+        continue;
+
+      // 小狼毫?
+      if (_wcsicmp(imeFile, L"weasel.ime") == 0) {
+        DWORD value;
+        swscanf_s(subKey, L"%x", &value);
+        UnloadKeyboardLayout((HKL)value);
+
+        RegDeleteKey(hKey, subKey);
+
+        // 移除preload
+        HKEY hPreloadKey;
+        ret = RegOpenKey(HKEY_CURRENT_USER, PRELOAD_KEY, &hPreloadKey);
+        if (ret != ERROR_SUCCESS)
+          continue;
+        std::vector<std::wstring> preloads;
+        std::wstring number;
+        for (size_t i = 1; true; ++i) {
+          number = std::to_wstring(i);
+          DWORD type = 0;
+          WCHAR value[32];
+          DWORD len = sizeof(value);
+          ret = RegQueryValueEx(hPreloadKey, number.c_str(), 0, &type,
+                                (LPBYTE)value, &len);
+          if (ret != ERROR_SUCCESS) {
+            if (i > preloads.size()) {
+              // 删除最大一号注册表值
+              number = std::to_wstring(i - 1);
+              RegDeleteValue(hPreloadKey, number.c_str());
+            }
+            break;
+          }
+          if (_wcsicmp(subKey, value) != 0) {
+            preloads.push_back(value);
+          }
+        }
+        // 重写preloads
+        for (size_t i = 0; i < preloads.size(); ++i) {
+          number = std::to_wstring(i + 1);
+          RegSetValueEx(hPreloadKey, number.c_str(), 0, REG_SZ,
+                        (const BYTE*)preloads[i].c_str(),
+                        (preloads[i].length() + 1) * sizeof(WCHAR));
+        }
+        RegCloseKey(hPreloadKey);
+      }
+    }
+  }
+
+  RegCloseKey(hKey);
+  return 0;
+}
+
+void enable_profile(BOOL fEnable, bool hant) {
+  HRESULT hr;
+  ITfInputProcessorProfiles* pProfiles = NULL;
+
+  hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, NULL,
+                        CLSCTX_INPROC_SERVER, IID_ITfInputProcessorProfiles,
+                        (LPVOID*)&pProfiles);
+
+  if (SUCCEEDED(hr)) {
+    LANGID lang_id = hant ? 0x0404 : 0x0804;
+    if (fEnable) {
+      pProfiles->EnableLanguageProfile(c_clsidTextService, lang_id,
+                                       c_guidProfile, fEnable);
+      pProfiles->EnableLanguageProfileByDefault(c_clsidTextService, lang_id,
+                                                c_guidProfile, fEnable);
+    } else {
+      pProfiles->RemoveLanguageProfile(c_clsidTextService, lang_id,
+                                       c_guidProfile);
+    }
+
+    pProfiles->Release();
+  }
+}
+
+int reload_tsf_gentle(bool hant) {
+  HRESULT hr;
+  ITfInputProcessorProfiles* pProfiles = NULL;
+  hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, NULL,
+                        CLSCTX_INPROC_SERVER, IID_ITfInputProcessorProfiles,
+                        (LPVOID*)&pProfiles);
+  if (FAILED(hr)) {
+    WeaselAppendLogW(L"install.log", L"reload-tsf",
+                     L"gentle reload CoCreateInstance failed");
+    return 1;
+  }
+  const LANGID lang_id = hant ? 0x0404 : 0x0804;
+  pProfiles->EnableLanguageProfile(c_clsidTextService, lang_id, c_guidProfile,
+                                   FALSE);
+  Sleep(400);
+  pProfiles->EnableLanguageProfile(c_clsidTextService, lang_id, c_guidProfile,
+                                   TRUE);
+  pProfiles->Release();
+  WeaselAppendLogW(L"install.log", L"reload-tsf",
+                   L"gentle EnableLanguageProfile toggle ok");
+  return 0;
+}
+
+// 注册TSF输入法
+int register_text_service(const std::wstring& tsf_path,
+                          bool register_ime,
+                          bool is_wow64,
+                          bool is_wowarm32,
+                          bool hant,
+                          bool silent) {
+  using RegisterServerFunction = HRESULT(STDAPICALLTYPE*)();
+
+  if (!register_ime)
+    enable_profile(FALSE, hant);
+
+  std::wstring params = L" \"" + tsf_path + L"\"";
+  if (!register_ime) {
+    params = L" /u " + params;  // unregister
+  }
+  // if (silent)  // always silent
+  { params = L" /s " + params; }
+
+  if (hant) {
+    if (!SetEnvironmentVariable(L"TEXTSERVICE_PROFILE", L"hant")) {
+      // bad luck
+    }
+  } else {
+    if (!SetEnvironmentVariable(L"TEXTSERVICE_PROFILE", L"hans")) {
+      // bad luck
+    }
+  }
+
+  std::wstring app = L"regsvr32.exe";
+  if (is_wowarm32) {
+    WCHAR sysarm32[MAX_PATH];
+    get_wow_arm32_system_dir(sysarm32, _countof(sysarm32));
+
+    app = std::wstring(sysarm32) + L"\\" + app;
+  } else if (is_wow64) {
+    app = native_system32_file(L"regsvr32.exe");
+    app.replace(app.find(L"System32"), 8, L"Sysnative");
+  }
+
+  SHELLEXECUTEINFOW shExInfo = {0};
+  shExInfo.cbSize = sizeof(shExInfo);
+  shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+  shExInfo.hwnd = 0;
+  shExInfo.lpVerb = L"open";               // Operation to perform
+  shExInfo.lpFile = app.c_str();           // Application to start
+  shExInfo.lpParameters = params.c_str();  // Additional parameters
+  shExInfo.lpDirectory = 0;
+  shExInfo.nShow = SW_SHOW;
+  shExInfo.hInstApp = 0;
+  if (ShellExecuteExW(&shExInfo)) {
+    WaitForSingleObject(shExInfo.hProcess, INFINITE);
+    CloseHandle(shExInfo.hProcess);
+  } else {
+    WCHAR msg[100];
+    CString str;
+    str.LoadStringW(IDS_STR_ERRREGTSF);
+    StringCchPrintfW(msg, _countof(msg), str, params.c_str());
+    // StringCchPrintfW(msg, _countof(msg), L"註冊輸入法錯誤 regsvr32.exe %s",
+    // params.c_str()); if (!silent) MessageBoxW(NULL, msg, L"安装/卸載失败",
+    // MB_ICONERROR | MB_OK);
+    MSG_NOT_SILENT_ID_CAP(silent, msg, IDS_STR_INORUN_FAILED,
+                          MB_ICONERROR | MB_OK);
+    return 1;
+  }
+
+  if (register_ime)
+    enable_profile(TRUE, hant);
+
+  return 0;
+}
+
+static bool file_size_matches(const std::wstring& src, const std::wstring& dst) {
+  WIN32_FILE_ATTRIBUTE_DATA src_info = {}, dst_info = {};
+  if (!GetFileAttributesExW(src.c_str(), GetFileExInfoStandard, &src_info))
+    return false;
+  if (!GetFileAttributesExW(dst.c_str(), GetFileExInfoStandard, &dst_info))
+    return false;
+  return src_info.nFileSizeLow == dst_info.nFileSizeLow &&
+         src_info.nFileSizeHigh == dst_info.nFileSizeHigh;
+}
+
+static bool file_size_matches_native(const std::wstring& src,
+                                     const std::wstring& dst) {
+  PVOID old = NULL;
+  if (is_wow64()) {
+    if (!Wow64DisableWow64FsRedirection(&old))
+      return false;
+  }
+  const bool ok = file_size_matches(src, dst);
+  if (old)
+    Wow64RevertWow64FsRedirection(old);
+  return ok;
+}
+
+static std::wstring query_file_version(const std::wstring& path) {
+  DWORD dummy = 0;
+  const DWORD sz = GetFileVersionInfoSizeW(path.c_str(), &dummy);
+  if (!sz)
+    return L"";
+  std::vector<BYTE> buf(sz);
+  if (!GetFileVersionInfoW(path.c_str(), 0, sz, buf.data()))
+    return L"";
+  VS_FIXEDFILEINFO* info = nullptr;
+  UINT len = 0;
+  if (!VerQueryValueW(buf.data(), L"\\", (LPVOID*)&info, &len) || !info)
+    return L"";
+  wchar_t ver[64] = {};
+  swprintf_s(ver, L"%u.%u.%u.%u", HIWORD(info->dwFileVersionMS),
+             LOWORD(info->dwFileVersionMS), HIWORD(info->dwFileVersionLS),
+             LOWORD(info->dwFileVersionLS));
+  return ver;
+}
+
+static std::wstring query_file_version_native(const std::wstring& path) {
+  PVOID old = NULL;
+  if (is_wow64()) {
+    if (!Wow64DisableWow64FsRedirection(&old))
+      return L"";
+  }
+  const std::wstring ver = query_file_version(path);
+  if (old)
+    Wow64RevertWow64FsRedirection(old);
+  return ver;
+}
+
+static bool file_version_matches(const std::wstring& src, const std::wstring& dst) {
+  const std::wstring sv = query_file_version(src);
+  const std::wstring dv = query_file_version(dst);
+  if (sv.empty() || dv.empty())
+    return false;
+  return sv == dv;
+}
+
+static bool file_version_matches_native(const std::wstring& src,
+                                        const std::wstring& dst) {
+  PVOID old = NULL;
+  if (is_wow64()) {
+    if (!Wow64DisableWow64FsRedirection(&old))
+      return false;
+  }
+  const bool ok = file_version_matches(src, dst);
+  if (old)
+    Wow64RevertWow64FsRedirection(old);
+  return ok;
+}
+
+static bool verify_system32_weasel_dll() {
+  WCHAR mod[MAX_PATH] = {};
+  GetModuleFileNameW(GetModuleHandle(NULL), mod, _countof(mod));
+  std::wstring install_dir(mod);
+  const size_t pos = install_dir.find_last_of(L"\\/");
+  if (pos == std::wstring::npos)
+    return false;
+  install_dir.resize(pos);
+
+  bool ok = true;
+  if (is_wow64()) {
+    std::wstring native_src = install_dir + L"\\weaselx64.dll";
+    if (is_arm64_machine())
+      native_src = install_dir + L"\\weaselARM64X.dll";
+    const std::wstring x64_dst = native_system32_file(L"weasel.dll");
+    const bool x64_ok =
+        file_size_matches_native(native_src, x64_dst) &&
+        file_version_matches_native(native_src, x64_dst);
+    ok = ok && x64_ok;
+    wchar_t buf[256];
+    swprintf_s(buf, L"verify %s ok=%d src=%s", x64_dst.c_str(), x64_ok ? 1 : 0,
+               native_src.c_str());
+    WeaselAppendLogW(L"install.log", L"setup", buf);
+
+    const std::wstring wow_src = install_dir + L"\\weasel.dll";
+    const std::wstring wow_dst = syswow64_file(L"weasel.dll");
+    const bool wow_ok = file_size_matches(wow_src, wow_dst) &&
+                        file_version_matches(wow_src, wow_dst);
+    ok = ok && wow_ok;
+    swprintf_s(buf, L"verify %s ok=%d src=%s", wow_dst.c_str(), wow_ok ? 1 : 0,
+               wow_src.c_str());
+    WeaselAppendLogW(L"install.log", L"setup", buf);
+    const std::wstring ver = query_file_version_native(x64_dst);
+    const std::wstring src_ver = query_file_version(native_src);
+    if (!ver.empty())
+      WeaselAppendLogW(L"install.log", L"setup",
+                       L"System32 weasel.dll version=" + ver +
+                           L" src_version=" + src_ver);
+  } else {
+    const std::wstring src = install_dir + L"\\weasel.dll";
+    const std::wstring dst = syswow64_file(L"weasel.dll");
+    ok = file_size_matches(src, dst) && file_version_matches(src, dst);
+    wchar_t buf[256];
+    swprintf_s(buf, L"verify %s ok=%d src=%s", dst.c_str(), ok ? 1 : 0,
+               src.c_str());
+    WeaselAppendLogW(L"install.log", L"setup", buf);
+  }
+  return ok;
+}
+
+bool verify_weasel_system32_install() {
+  return verify_system32_weasel_dll();
+}
+
+static LSTATUS WriteWeaselRegSz(const wchar_t* name, const wchar_t* value) {
+  const LSTATUS r64 = SetRegKeyValue(HKEY_LOCAL_MACHINE, WEASEL_REG_KEY, name,
+                                     value, REG_SZ, true);
+  const LSTATUS r32 = SetRegKeyValue(HKEY_LOCAL_MACHINE, WEASEL_REG_KEY, name,
+                                     value, REG_SZ, false);
+  if (r64 == ERROR_SUCCESS || r32 == ERROR_SUCCESS)
+    return ERROR_SUCCESS;
+  return r64;
+}
+
+int install(bool hant, bool silent, bool old_ime_support) {
+  WeaselAppendLogW(L"install.log", L"setup",
+                   L"install() start hant=" + std::to_wstring(hant) +
+                       L" silent=" + std::to_wstring(silent));
+  std::wstring ime_src_path;
+  int retval = 0;
+  if (old_ime_support) {
+    retval +=
+        install_ime_file(ime_src_path, L".ime", hant, silent, &register_ime);
+  }
+  retval += install_ime_file(ime_src_path, L".dll", hant, silent,
+                             &register_text_service);
+
+  // 写注册表
+  WCHAR drive[_MAX_DRIVE];
+  WCHAR dir[_MAX_DIR];
+  _wsplitpath_s(ime_src_path.c_str(), drive, _countof(drive), dir,
+                _countof(dir), NULL, 0, NULL, 0);
+  std::wstring rootDir = std::wstring(drive) + dir;
+  rootDir.pop_back();
+  std::wstring installDir = rootDir;
+  while (!installDir.empty() &&
+         (installDir.back() == L'\\' || installDir.back() == L'/'))
+    installDir.pop_back();
+  const size_t slash = installDir.find_last_of(L"\\/");
+  if (slash != std::wstring::npos)
+    installDir = installDir.substr(0, slash);
+  auto ret = WriteWeaselRegSz(L"WeaselRoot", rootDir.c_str());
+  if (FAILED(HRESULT_FROM_WIN32(ret))) {
+    MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_ERRWRITEWEASELROOT,
+                          IDS_STR_INSTALL_FAILED, MB_ICONERROR | MB_OK);
+    return 1;
+  }
+
+  ret = WriteWeaselRegSz(L"InstallDir", installDir.c_str());
+
+  const std::wstring executable = L"WeaselServer.exe";
+  ret = WriteWeaselRegSz(L"ServerExecutable", executable.c_str());
+  if (FAILED(HRESULT_FROM_WIN32(ret))) {
+    MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_ERRREGIMEWRITESVREXE,
+                          IDS_STR_INSTALL_FAILED, MB_ICONERROR | MB_OK);
+    return 1;
+  }
+
+  // InstallLayoutOrTip
+  // https://learn.microsoft.com/zh-cn/windows/win32/tsf/installlayoutortip
+  // example in ref page not right with "*PTF_ INSTALLLAYOUTORTIP"
+  // space inside should be removed
+  HMODULE hInputDLL = LoadLibrary(TEXT("input.dll"));
+  if (hInputDLL) {
+    PTF_INSTALLLAYOUTORTIP pfnInstallLayoutOrTip;
+    pfnInstallLayoutOrTip =
+        (PTF_INSTALLLAYOUTORTIP)GetProcAddress(hInputDLL, "InstallLayoutOrTip");
+    if (pfnInstallLayoutOrTip) {
+      if (hant)
+        (*pfnInstallLayoutOrTip)(PSZTITLE_HANT, 0);
+      else
+        (*pfnInstallLayoutOrTip)(PSZTITLE_HANS, 0);
+    }
+    FreeLibrary(hInputDLL);
+  }
+
+  // https://learn.microsoft.com/zh-cn/windows/win32/wer/collecting-user-mode-dumps
+  const std::wstring dmpPathW = WeaselLogPath().wstring();
+  // DumpFolder
+  SetRegKeyValue(HKEY_LOCAL_MACHINE, WEASEL_WER_KEY, L"DumpFolder",
+                 dmpPathW.c_str(), REG_SZ, true);
+  // dump type 0
+  SetRegKeyValue(HKEY_LOCAL_MACHINE, WEASEL_WER_KEY, L"DumpType", 0, REG_DWORD,
+                 true);
+  // CustomDumpFlags, MiniDumpNormal
+  SetRegKeyValue(HKEY_LOCAL_MACHINE, WEASEL_WER_KEY, L"CustomDumpFlags", 0,
+                 REG_DWORD, true);
+  // maximium dump count 10
+  SetRegKeyValue(HKEY_LOCAL_MACHINE, WEASEL_WER_KEY, L"DumpCount", 10,
+                 REG_DWORD, true);
+
+  if (retval) {
+    WeaselAppendLogW(L"install.log", L"setup",
+                     L"install() failed retval=" + std::to_wstring(retval));
+    return 1;
+  }
+
+  if (!verify_system32_weasel_dll()) {
+    WeaselAppendLogW(L"install.log", L"setup",
+                     L"install() failed: System32 weasel.dll mismatch");
+    MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_INSTALL_FAILED, IDS_STR_INSTALL_FAILED,
+                          MB_ICONERROR | MB_OK);
+    return 1;
+  }
+
+  WeaselAppendLogW(L"install.log", L"setup", L"install() success");
+  MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_INSTALL_SUCCESS_INFO,
+                        IDS_STR_INSTALL_SUCCESS_CAP,
+                        MB_ICONINFORMATION | MB_OK);
+  return 0;
+}
+
+int uninstall(bool silent) {
+  // 注销输入法
+  int retval = 0;
+
+  const WCHAR KEY[] = L"Software\\Rime\\Weasel";
+  HKEY hKey;
+  LSTATUS ret = RegOpenKey(HKEY_CURRENT_USER, KEY, &hKey);
+  if (ret == ERROR_SUCCESS) {
+    DWORD type = 0;
+    DWORD data = 0;
+    DWORD len = sizeof(data);
+    ret = RegQueryValueEx(hKey, L"Hant", NULL, &type, (LPBYTE)&data, &len);
+    if (ret == ERROR_SUCCESS && type == REG_DWORD) {
+      HMODULE hInputDLL = LoadLibrary(TEXT("input.dll"));
+      if (hInputDLL) {
+        PTF_INSTALLLAYOUTORTIP pfnInstallLayoutOrTip;
+        pfnInstallLayoutOrTip = (PTF_INSTALLLAYOUTORTIP)GetProcAddress(
+            hInputDLL, "InstallLayoutOrTip");
+        if (pfnInstallLayoutOrTip) {
+          if (data != 0)
+            (*pfnInstallLayoutOrTip)(PSZTITLE_HANT, ILOT_UNINSTALL);
+          else
+            (*pfnInstallLayoutOrTip)(PSZTITLE_HANS, ILOT_UNINSTALL);
+        }
+        FreeLibrary(hInputDLL);
+      }
+    }
+    RegCloseKey(hKey);
+  }
+
+  uninstall_ime_file(L".ime", silent, &register_ime);
+  retval += uninstall_ime_file(L".dll", silent, &register_text_service);
+
+  // 清除注册信息
+  RegDeleteKey(HKEY_LOCAL_MACHINE, WEASEL_REG_KEY);
+  RegDeleteKey(HKEY_LOCAL_MACHINE, RIME_REG_KEY);
+
+  // delete WER register,
+  // "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\Windows Error
+  // Reporting\\LocalDumps\\WeaselServer.exe" no WOW64 redirect
+
+  auto flag_wow64 = is_wow64() ? KEY_WOW64_64KEY : 0;
+  RegDeleteKeyEx(HKEY_LOCAL_MACHINE, WEASEL_WER_KEY, flag_wow64, 0);
+  if (retval)
+    return 1;
+
+  MSG_NOT_SILENT_BY_IDS(silent, IDS_STR_UNINSTALL_SUCCESS_INFO,
+                        IDS_STR_UNINSTALL_SUCCESS_CAP,
+                        MB_ICONINFORMATION | MB_OK);
+  return 0;
+}
+
+bool has_installed() {
+  WCHAR path[MAX_PATH];
+  GetSystemDirectory(path, _countof(path));
+  std::wstring sysPath(path);
+  DWORD attr = GetFileAttributesW((sysPath + L"\\weasel.dll").c_str());
+  return (attr != INVALID_FILE_ATTRIBUTES &&
+          !(attr & FILE_ATTRIBUTE_DIRECTORY));
+}

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>小狼毫更新说明</title>
+<style>
+body { font-family: "Microsoft YaHei UI", sans-serif; margin: 16px; color: #333; line-height: 1.6; }
+h1 { font-size: 18px; margin-bottom: 8px; }
+h2 { font-size: 14px; margin-top: 16px; color: #555; }
+ul { padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1>小狼毫输入法更新</h1>
+<h2>0.18.48</h2>
+<ul>
+  <li>修复单字母无候选：TestKeyDown/KeyDown 只送一次 Rime；sync 刷新绕过 edit_session_pending</li>
+  <li>修复 Shift 切英文后首键回弹中文：SetAsciiMode 同步生效；Shift 释放不再污染 IPC 响应</li>
+  <li>移除 F13 辅助 IPC，避免覆盖 pipe buffer 导致 AI→A4I 等乱码</li>
+</ul>
+<h2>0.18.47</h2>
+<ul>
+  <li>修复单字母首键无候选：按键后同步刷新候选窗，并确保 IPC 会话已建立</li>
+  <li>修复中文模式下 Shift 输入英文（如 AI）误上屏为 A4I：撤销字母误标组合键及多余 F13 注入</li>
+  <li>DoEditSession/直插文本增加异常捕获，降低第三方应用（如 Directory Opus）崩溃风险</li>
+</ul>
+<h2>0.18.46</h2>
+<ul>
+  <li>修复 Shift+标点后误切英文导致无候选：ascii_composer 改 noop，单击 Shift 由 TSF 安全切换</li>
+  <li>常用短语仅向当前输入会话提交，聚焦 context 优先，失败时剪贴板兜底</li>
+  <li>默认 display_tray_icon=false，语言栏图标靠近中英文切换，避免托盘溢出区隐藏</li>
+  <li>修复 appcast 历史条目被误覆盖，在线升级可正确检测新版本</li>
+</ul>
+<h2>0.18.45</h2>
+<ul>
+  <li>移除 Shift PreserveKey，修复单击 Shift 切换中英文及英文模式滞留导致无候选</li>
+  <li>常用短语：增强 TSF 直插与 notify 广播；全局键盘钩子支持方向键/回车上屏</li>
+  <li>默认改用 TSF 语言栏图标（靠近输入法切换区），避免托盘溢出区隐藏</li>
+  <li>修复 appcast 生成逻辑，确保在线升级仅更新最新版本条目</li>
+</ul>
+<h2>0.18.44</h2>
+<ul>
+  <li>修复 Shift 单击切换中英文：PreserveKey 拦截后现正确转发 Rime</li>
+  <li>修复英文模式滞留导致打字无候选；Shift+字母不再误标为组合键</li>
+  <li>常用短语：恢复焦点与 Enter/双击上屏；词典管理去除重复标题栏并启用深色系统标题栏</li>
+</ul>
+<h2>0.18.43</h2>
+<ul>
+  <li>修复 Shift 切换中英文、Ctrl+Shift+数字 切换中英文标点快捷键失效</li>
+  <li>常用短语面板：默认加宽、细边框、标题栏增加关闭按钮</li>
+  <li>安装器界面统一深色主题（黑色标题栏与页头）</li>
+  <li>注册表同时写入 64 位与 WOW6432 视图；新增 WeaselVerify.exe 安装后验证工具</li>
+</ul>
+<h2>0.18.42</h2>
+<ul>
+  <li>紧急修复：TSF 编辑会话重入导致微信等 Chromium 宿主崩溃（OnEndEdit 延迟 EndComposition + 主会话内联结束）</li>
+  <li>安装时自动结束微信/飞书/钉钉/Cursor 等长驻进程，避免混合加载旧版 weasel.dll</li>
+</ul>
+<h2>0.18.41</h2>
+<ul>
+  <li>紧急修复：EditSession 同步执行后错误标记 pending，导致首次按键后完全无法输入</li>
+  <li>Activate/Deactivate 时重置 EditSession 状态；安装日志补充 InstallDir</li>
+</ul>
+<h2>0.18.40</h2>
+<ul>
+  <li>紧急修复：串行化 TSF EditSession，防止同一 composition 被二次 EndComposition 导致全应用崩溃</li>
+  <li>移除 TestKey 阶段重复 UpdateComposition；鼠标选词不再 SendInput 重入</li>
+  <li>安装后 reload-tsf 失败时返回非零退出码并写入 install.log</li>
+</ul>
+<h2>0.18.39</h2>
+<ul>
+  <li>紧急修复：移除按键中途 OnSetFocus 误触发 AbortComposition，解决微信/飞书/钉钉/Cursor 输入时崩溃</li>
+</ul>
+<h2>0.18.38</h2>
+<ul>
+  <li>候选窗残留：Hide 时清空 layered 缓冲；非组词态跳过 Refresh；隐藏后禁止 LayerUpdate</li>
+</ul>
+<h2>0.18.37</h2>
+<ul>
+  <li>修复 TSF 候选窗重复 Create 导致桌面残留多个状态图标的问题</li>
+</ul>
+<h2>0.18.36</h2>
+<ul>
+  <li>修复删除路径历史问题：轻量 deploy_config_file、剪贴板回退、编码提取优先级、user_dict 解析</li>
+  <li>设置界面：深色标题栏（与候选条风格一致），安装向导现代化深色主题</li>
+  <li>中英标点独立守卫，避免误回滚 Ctrl+Shift 标点切换</li>
+</ul>
+<h2>0.18.35</h2>
+<ul>
+  <li>候选删除：右键与 Shift+Ctrl+数字键恢复为直接删除（移除确认条）</li>
+  <li>修复 Shift 切换中英文、Ctrl+Shift+3 切换中英标点被错误回滚的问题</li>
+  <li>中文输入模式下「/」输出顿号「、」</li>
+  <li>左右 Shift 均支持单击切换中英文</li>
+</ul>
+<h2>0.18.34</h2>
+<ul>
+  <li>候选词右键：内嵌「删除该候选词」确认条，左键确认后删除（替代不可靠的系统菜单）</li>
+  <li>词典管理：短语编辑区增高、应用修改按钮不再重叠；窗口可缩放（去除 DS_MODALFRAME）</li>
+  <li>常用短语：托盘面板与编辑窗口默认更大、可缩放；修复拖动边框导致窗口消失</li>
+  <li>快捷键设置：移除无效的简繁切换项；限制窗口最大高度消除底部空白</li>
+</ul>
+<h2>0.18.33</h2>
+<ul>
+  <li>审查修复：常用短语提交改用 WM_COPYDATA + 发送方 PID 校验，消除跨进程堆指针风险</li>
+  <li>删除短语：空编码时不再误删所有同形词条</li>
+  <li>ARM64 升级校验比对 weaselARM64X.dll</li>
+  <li>词典管理：双文件分存 custom_phrase.txt / custom_phrase_double.txt</li>
+  <li>维护模式清理 notify 窗口映射；无会话时跳过 SetOption 假写入</li>
+  <li>UI 窗口几何记忆允许坐标 (0,0)；t9 方案 custom_phrase 改为 tabledb</li>
+</ul>
+<h2>0.18.32</h2>
+<ul>
+  <li>升级链路加固：<code>/upgrade</code> 失败时安装程序中止并提示查看 install.log</li>
+  <li>升级前结束 WeaselServer 进程，避免 System32 weasel.dll 文件锁</li>
+  <li><code>CustomInstall</code> 在 <code>force_silent</code> 时也强制 <code>install()</code>，双保险防止升级跳过 DLL 拷贝</li>
+  <li>托盘日常清理拆分为 <code>PurgeLightTrayIcons()</code>（GUID + 进程内），完整清理仍由 <code>/purge-tray</code> 执行</li>
+  <li>新增 <code>scripts/accept_test.ps1</code> 用于管理员手动验收 <code>/upgrade</code> 与 DLL 大小一致性</li>
+</ul>
+<h2>0.18.21</h2>
+<ul>
+  <li>根因修复：新增 <code>WeaselSetup /upgrade</code>，升级时强制拷贝 System32 weasel.dll 并 regsvr32</li>
+  <li>拷贝后校验 System32 与安装目录 weaselx64.dll 大小一致，失败则安装返回错误</li>
+  <li>托盘幽灵项：同时清理 <code>Control Panel\NotifyIconSettings</code> 与 Explorer 路径</li>
+  <li>安装顺序：quit → kill TSF 宿主 → /upgrade → deploy → /reload-tsf → /purge-tray</li>
+</ul>
+<h2>0.18.20</h2>
+<ul>
+  <li>审查修补：语言栏可见性日志限流；IPC/UI ascii block 共用限流</li>
+  <li>删除快捷键支持小键盘 Shift+Ctrl+1…9；候选窗 HWND 变化时重装鼠标钩子</li>
+  <li>UpdateStyle 同步 _style 与 _ui->style()；注册表清理后广播 TraySettings 刷新</li>
+  <li>/reload-tsf 使用可写命令行缓冲区</li>
+</ul>
+<h2>0.18.19</h2>
+<ul>
+  <li>注册表清理以 KEY_WRITE 打开，RegDeleteTreeW 删除匹配项；记录 matched/removed</li>
+  <li>display_tray_icon 为 true 时隐藏 TSF 语言栏，避免双「中」图标</li>
+  <li>DllMain 写 weasel.dll loaded 版本；新增 /reload-tsf；安装流程加强 TSF 重载</li>
+  <li>Shift+Ctrl+1…9 删除第 1–9 位候选；Ctrl+Delete 删除高亮项</li>
+</ul>
+<h2>0.18.18</h2>
+<ul>
+  <li>假死：IPC 层直接丢弃未授权 40013/40014，不再 PostMessage 洪水</li>
+  <li>双图标：移除 TSF 语言栏 SHOWNINTRAY 托盘样式</li>
+  <li>删除候选：WH_MOUSE 钩子转发右键；Ctrl+Delete 删除高亮候选；weasel.ui.log 全链路</li>
+  <li>ActivateEx 写版本到 weasel.tsf.log，便于确认 DLL 已重载</li>
+</ul>
+<h2>0.18.17</h2>
+<ul>
+  <li>删除候选：右键候选显示内嵌「删除该候选词」条，左键确认后 IPC 删除</li>
+  <li>溢出区幽灵图标：PurgeAllLegacyWeaselTrayIcons；安装时 /purge-tray；Create 仅在可见时 NIM_ADD</li>
+</ul>
+<h2>0.18.16</h2>
+<ul>
+  <li>Shift：阻断未授权 TrayCommand 40013/40014 → SetOption 路径；ascii 授权位 WEASEL_TRAY_USER_INITIATED</li>
+  <li>托盘：GUID 清理 + 避免重复 NIM_ADD；AddIcon 前按 GUID 全局删除</li>
+  <li>删除：AttachThreadInput + TrackPopupMenuEx；Server/TSF 增加 delete 日志</li>
+</ul>
+<h2>0.18.15</h2>
+<ul>
+  <li>稳定性：移除启动时反复 Shutdown/Kill 进程逻辑（此前可导致 IPC 风暴与系统假死）</li>
+  <li>稳定性：限制 TSF 自动拉起服务为 60 秒最多一次，不再反复执行 start_service.bat</li>
+  <li>托盘：修复 GUID 图标下左键 wParam 不匹配导致快捷栏无响应</li>
+  <li>Shift：除 Ctrl+Space/CapsLock 外，禁止任何按键事件切换 ascii_mode</li>
+  <li>删除候选：菜单 SetForegroundWindow + 每次 StartUI 重绑回调</li>
+</ul>
+<h2>0.18.14</h2>
+<ul>
+  <li>托盘：单 GUID 图标注册在 WeaselServer 主窗口；启动/退出时清理进程内全部幽灵图标；安装末尾先 /quit 再启动</li>
+  <li>快捷栏：托盘左键消息改由 Server 窗口统一处理，避免双图标时一点击失效</li>
+  <li>Shift 组合：部署时强制修补用户 default.yaml；服务端拦截 Shift 释放导致的中英切换；启用 TSF PreserveKey</li>
+</ul>
+<h2>0.18.13</h2>
+<ul>
+  <li>托盘：启动前清理残留 WeaselServer 进程与幽灵托盘图标；修复 start_service.bat 叠加多实例</li>
+  <li>快捷栏：单实例互斥锁持有至进程结束，避免旧版三按钮快捷栏与多图标并存</li>
+  <li>候选窗右键：移除 WS_EX_TRANSPARENT、增加 WM_NCHITTEST，修复「删除该候选词」菜单不弹出</li>
+  <li>Shift 组合：加强 TSF 层组合键检测；新增 default.custom.yaml 强制 Shift 释放不切换</li>
+</ul>
+<h2>0.18.12</h2>
+<ul>
+  <li>长句选词：修复选 1～2 次后候选窗消失（TSF 部分上屏时 EndUI 竞态 + OnCompositionTerminated 误 Abort）</li>
+  <li>候选窗右键「删除该候选词」：删除后 RequestEditSession 刷新，不再依赖无效的 VK_SELECT</li>
+  <li>组词学习：上屏后立即 FinishSession 写入用户词典；明确 user_dict: rime_ice</li>
+  <li>Shift 误切换：default.yaml 将 Shift_L/R 改为 noop，Ctrl+Space 切换中英文；修正补丁脚本不再改回 commit_code</li>
+  <li>文档：docs/SHIFT_COMBO_ANALYSIS.md 记录已证伪方案，避免重复试错</li>
+</ul>
+<h2>0.18.11</h2>
+<ul>
+  <li>紧急回退：移除全局 WH_KEYBOARD_LL 钩子（此前导致系统/托盘无响应，需任务管理器强杀）</li>
+  <li>Shift 切换：回归 Rime 官方 ascii_composer 和弦检测 + TSF Compartment 反向同步阻断</li>
+  <li>托盘：回归官方单图标逻辑（IDR_MENU_POPUP）</li>
+  <li>修复词典管理导出按钮消失（RC 重复对话框 + DPI 缩放裁切）</li>
+  <li>修复快捷栏「常用」按钮在进程重启后丢失（旧窗口未含第 4 按钮时自动重建）</li>
+</ul>
+<h2>0.18.10</h2>
+<ul>
+  <li>安装静默：WeaselSetup 支持 /setupquiet，不再弹出「修改用户文件夹」提示</li>
+  <li>Shift 组合键：修正钩子模块句柄（g_hInst），系统层吞掉组合后的 Shift 释放；切断 KEYBOARD_OPENCLOSE 反向同步</li>
+  <li>托盘：Create 延迟 NIM_ADD + weasel.tray.log 追踪，修复三图标与悬停卡顿</li>
+  <li>词典导出：合并 custom_phrase.txt、custom_phrase_double.txt 与常用短语文件</li>
+</ul>
+<h2>0.18.9</h2>
+<ul>
+  <li>Shift 组合键：低级键盘钩子 + weasel.ascii.log 追踪，彻底阻断误切换</li>
+  <li>安装过程静默部署，不再弹出「更新用户数据/方案选择」对话框</li>
+  <li>常用短语 Enter/方向键/Esc 由全局钩子拦截，不再泄漏到聊天窗口</li>
+  <li>托盘图标：专用 Notify ID + GUID，去除重复 AddIcon</li>
+</ul>
+<h2>0.18.8</h2>
+<ul>
+  <li>修复 Shift 组合键误切换中英文（根因：Windows INPUTMODE 反向同步，非 Rime 试错）</li>
+  <li>修复切换输入法后任务栏卡顿（Compartment 反馈环去抖 + 减少每键 IPC/TSF 查询）</li>
+  <li>移除启动时强杀其他 WeaselServer 进程，避免多实例竞态</li>
+</ul>
+<h2>0.18.7</h2>
+<ul>
+  <li>修复常用短语双击/Enter 无法上屏：面板不再抢占焦点，TSF 直接插入文本并恢复输入框焦点</li>
+  <li>修复 Shift 组合键误切换：Rime 层识别和弦按键 + 组合时重置 ascii_composer 状态</li>
+  <li>清理重复托盘图标：合并启动项、终止残留进程、统一 AppUserModelID</li>
+  <li>快捷栏/常用短语/快捷键/词典界面视觉升级（Fluent 风格）</li>
+</ul>
+<h2>0.18.6</h2>
+<ul>
+  <li>修复常用短语双击/Enter 无法上屏（保留最近输入会话，剪贴板兜底）</li>
+  <li>常用短语支持 ↑↓ 选择、Enter 上屏、Esc 关闭；Ctrl+Shift+K 全局热键可靠弹出</li>
+  <li>新增快捷设置栏快捷键，默认 Ctrl+Shift+F，可在快捷键设置中修改</li>
+  <li>快捷栏默认位置上移避开任务栏，顶部拖动手柄可自由移动并记忆位置</li>
+  <li>进一步修复 Shift 组合键误切换中英文（物理组合检测 + 阻断托盘同步）</li>
+  <li>移除全局低级鼠标钩子，减轻偶发系统卡顿</li>
+  <li>词典管理等界面统一 Fluent 风格字体</li>
+</ul>
+<h2>0.18.5</h2>
+<ul>
+  <li>彻底修复 Shift 组合键误切换中英文：阻断 TSF 转换模式同步与 ascii_composer 联动</li>
+  <li>修复常用短语列表添加后不显示（重载时误触发立即上屏）</li>
+  <li>修复 Ctrl+Shift+K 无法打开常用短语列表</li>
+  <li>修复候选词右键菜单不显示「删除该候选词」</li>
+  <li>快捷栏、常用短语与设置窗口界面美化（Fluent 风格）</li>
+</ul>
+<h2>0.18.4</h2>
+<ul>
+  <li>修复固定短语保存后需手动部署才生效的问题，保存后自动重新部署</li>
+  <li>修复 Shift 组合键（如 Shift+/）仍误切换中英文的问题</li>
+  <li>新增「常用短语」：快捷栏按钮、默认 Ctrl+Shift+K 快捷键，点选上屏</li>
+  <li>常用短语支持列表编辑（无需设置编码），与固定短语区分</li>
+</ul>
+<h2>0.18.3</h2>
+<ul>
+  <li>快捷键/词典窗口高 DPI 适配与界面美化，打开时自动置顶</li>
+  <li>修复长输入时候选窗意外消失</li>
+  <li>候选词右键可删除词条</li>
+  <li>修复 Shift 组合键（如 Shift+/ 输入问号）误切换中英文</li>
+  <li>词典管理统一固定短语与学习词条，导入合并去重、导出合并</li>
+</ul>
+</body>
+</html>

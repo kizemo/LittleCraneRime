@@ -1,0 +1,10 @@
+# 用户方案覆盖（可选）
+# encoding: utf-8
+#
+# 用户词典说明：
+# - 选词上屏会自动记录使用频率，即使词条已在固定词库中也会出现，属 Rime 正常行为
+# - 若不需要自动学习，取消下行注释：
+#
+# patch:
+#   translator:
+#     enable_user_dict: false

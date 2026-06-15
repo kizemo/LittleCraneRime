@@ -1,0 +1,120 @@
+# ============================================
+# Build artifacts & temporary files
+# ============================================
+msbuild/
+*.user
+*.suo
+*.pdb
+*.idb
+*.obj
+*.pch
+*.res
+*.sdf
+*.opensdf
+*.cachefile
+*.VC.db
+*.aps
+*.ipch
+*.tlog
+*.exp
+*.lib
+*.lastbuildstate
+
+# ============================================
+# Output binaries (NOT in source repo)
+# ============================================
+output/*.exe
+output/*.dll
+output/*.ime
+output/*.log
+output/*.txt
+output/7z.exe
+output/7z.dll
+output/Win32/
+
+# NSIS install script output
+output/installer.nsh
+
+# ============================================
+# Boost libraries (locally built)
+# ============================================
+boost-build/
+boost-binaries/
+boost-source/
+boost_*/
+deps/
+
+# ============================================
+# librime submodule (use git submodule)
+# ============================================
+librime/
+
+# Prebuilt RIME libraries (large binaries)
+rime-*.7z
+rime-*.zip
+plum/
+
+# ============================================
+# Local release / installer staging
+# ============================================
+release/
+installer-test/
+
+# ============================================
+# Logs
+# ============================================
+*.log
+build-setup*.log
+build-setup*.err.log
+build-setup*.out.log
+boost-build-deps*.log
+boost-build-run.log
+boost-env.log
+boost-*.log
+msbuild*.log
+check-msvc.log
+pack-installer*.log
+pack-installer*.err.log
+pack-installer*.out.log
+build-*.log
+build-*.err.log
+build-*.out.log
+vc-env-dump.txt
+accept_test_result.txt
+
+# ============================================
+# IDE
+# ============================================
+.vs/
+.idea/
+.vscode/
+*.code-workspace
+xcuserdata/
+
+# ============================================
+# Local config & temp
+# ============================================
+*.local
+local.properties
+*.bak
+*.tmp
+*.tmp.*
+
+# ============================================
+# OS files
+# ============================================
+Thumbs.db
+.DS_Store
+desktop.ini
+*.swp
+*.swo
+
+# ============================================
+# Symbol files (too large for git, kept locally)
+# ============================================
+*.map
+
+# ============================================
+# 7z binary (downloaded for NSIS compression)
+# ============================================
+7z.exe

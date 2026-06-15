@@ -1,0 +1,5 @@
+# 用户覆盖：合并快捷键 patch（Shift 切换等由 weasel_hotkeys.yaml 提供）
+# encoding: utf-8
+
+patch:
+  __include: weasel_hotkeys:/patch
