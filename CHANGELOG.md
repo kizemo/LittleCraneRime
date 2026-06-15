@@ -3,7 +3,8 @@
 本文件记录 **LittleCraneRime（小鹤输入法）** 仓库的版本变更历史。
 
 > 上游变更历史请参考 [rime/weasel CHANGELOG](https://github.com/rime/weasel/blob/master/CHANGELOG.md)。
-> 本仓库起点：`rime/weasel 0.18.99`（含 `0.18.91` → `0.18.99` 上游的修复）。
+> 本仓库 fork 自 [rime/weasel 0.17.4](https://github.com/rime/weasel/releases/tag/0.17.4)（上游 2025-06-04 发布的最新稳定版）。
+> 本仓库的版本号（如 `0.18.100`）是 fork 自己的迭代号，与上游版本号无直接对应关系。
 
 ---
 
@@ -163,7 +164,7 @@
 
 - 上游 master 分支有新 commit → cherry-pick 应用本仓库
 - 上游新版本发布 → 评估差异，必要时升级基线
-- 当前基线：`rime/weasel 0.18.99`
+- 当前 fork 基线：`rime/weasel 0.17.4`（2025-06-04）
 - 上游 master 升级 → 优先同步 `WeaselTSF/` 和 `WeaselUI/`（UI/TSF 改动），保留本仓库的 `WeaselCrashDiag.h`、`ShiftComboGuard.h`、`WeaselEditSessionSafe.h` 等
 
 ---
