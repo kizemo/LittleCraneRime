@@ -140,7 +140,7 @@ bool HotkeySettingsDialog::SaveSettings(const HotkeySettings& settings) {
 
   auto w = [&](const std::wstring& s) { return wtou8(s); };
 
-  out << "# 小狼毫快捷键自定义配置\n# encoding: utf-8\n\n"
+  out << "# 小鹅快捷键自定义配置\n# encoding: utf-8\n\n"
          "customization:\n"
          "  distribution_code_name: Weasel\n"
          "  generator: \"Weasel Hotkey Settings\"\n"

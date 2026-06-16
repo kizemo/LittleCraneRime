@@ -23,17 +23,17 @@ Unicode true
 !define REG_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\Weasel"
 
 ; The name of the installer
-Name "小狼毫 ${WEASEL_VERSION}"
+Name "小鹅 ${WEASEL_VERSION}"
 
 ; The file to write
 OutFile "..\..\release\weasel-${PRODUCT_VERSION}-installer.exe"
 
 VIProductVersion "${WEASEL_VERSION}.${WEASEL_BUILD}"
-VIAddVersionKey /LANG=2052 "ProductName" "小狼毫"
+VIAddVersionKey /LANG=2052 "ProductName" "小鹅"
 VIAddVersionKey /LANG=2052 "Comments" "Powered by RIME | 中州韻輸入法引擎"
 VIAddVersionKey /LANG=2052 "CompanyName" "式恕堂"
 VIAddVersionKey /LANG=2052 "LegalCopyright" "Copyleft RIME Developers"
-VIAddVersionKey /LANG=2052 "FileDescription" "小狼毫輸入法"
+VIAddVersionKey /LANG=2052 "FileDescription" "小鹅輸入法"
 VIAddVersionKey /LANG=2052 "FileVersion" "${WEASEL_VERSION}"
 
 !define MUI_ICON ..\resource\weasel.ico
@@ -55,7 +55,7 @@ RequestExecutionLevel admin
 !define MUI_TEXTCOLOR FFFFFF
 !define MUI_INSTFILESPAGE_COLORS "1C1C1E FFFFFF"
 !define MUI_FINISHPAGE_TITLE "安装完成"
-!define MUI_FINISHPAGE_TEXT "小狼毫输入法已安装。$\r$\n$\r$\n安装程序已自动完成：更新 System32 DLL、部署配置、重启 TSF 输入法服务并启动服务。$\r$\n可直接开始使用，无需注销、重启或手动重新部署。$\r$\n若个别应用仍显示旧输入法，关闭该应用后重新打开即可。"
+!define MUI_FINISHPAGE_TEXT "小鹅输入法已安装。$\r$\n$\r$\n安装程序已自动完成：更新 System32 DLL、部署配置、重启 TSF 输入法服务并启动服务。$\r$\n可直接开始使用，无需注销、重启或手动重新部署。$\r$\n若个别应用仍显示旧输入法，关闭该应用后重新打开即可。"
 
 ;--------------------------------
 
@@ -75,36 +75,36 @@ RequestExecutionLevel admin
 ; Languages
 
 !insertmacro MUI_LANGUAGE "TradChinese"
-LangString DISPLAYNAME ${LANG_TRADCHINESE} "小狼毫輸入法"
-LangString LNKFORMANUAL ${LANG_TRADCHINESE} "【小狼毫】說明書"
-LangString LNKFORSETTING ${LANG_TRADCHINESE} "【小狼毫】輸入法設定"
-LangString LNKFORDICT ${LANG_TRADCHINESE} "【小狼毫】用戶詞典管理"
-LangString LNKFORSYNC ${LANG_TRADCHINESE} "【小狼毫】用戶資料同步"
-LangString LNKFORDEPLOY ${LANG_TRADCHINESE} "【小狼毫】重新部署"
-LangString LNKFORSERVER ${LANG_TRADCHINESE} "小狼毫算法服務"
-LangString LNKFORUSERFOLDER ${LANG_TRADCHINESE} "【小狼毫】用戶文件夾"
-LangString LNKFORAPPFOLDER ${LANG_TRADCHINESE} "【小狼毫】程序文件夾"
-LangString LNKFORUPDATER ${LANG_TRADCHINESE} "【小狼毫】檢查新版本"
-LangString LNKFORSETUP ${LANG_TRADCHINESE} "【小狼毫】安裝選項"
-LangString LNKFORUNINSTALL ${LANG_TRADCHINESE} "卸載小狼毫"
-LangString CONFIRMATION ${LANG_TRADCHINESE} "安裝前，請先卸載舊版本的小狼毫。$\n$\n按下「確定」移除舊版本，按下「取消」放棄本次安裝。"
+LangString DISPLAYNAME ${LANG_TRADCHINESE} "小鵝輸入法"
+LangString LNKFORMANUAL ${LANG_TRADCHINESE} "【小鵝】說明書"
+LangString LNKFORSETTING ${LANG_TRADCHINESE} "【小鵝】輸入法設定"
+LangString LNKFORDICT ${LANG_TRADCHINESE} "【小鵝】用戶詞典管理"
+LangString LNKFORSYNC ${LANG_TRADCHINESE} "【小鵝】用戶資料同步"
+LangString LNKFORDEPLOY ${LANG_TRADCHINESE} "【小鵝】重新部署"
+LangString LNKFORSERVER ${LANG_TRADCHINESE} "小鵝算法服務"
+LangString LNKFORUSERFOLDER ${LANG_TRADCHINESE} "【小鵝】用戶文件夾"
+LangString LNKFORAPPFOLDER ${LANG_TRADCHINESE} "【小鵝】程序文件夾"
+LangString LNKFORUPDATER ${LANG_TRADCHINESE} "【小鵝】檢查新版本"
+LangString LNKFORSETUP ${LANG_TRADCHINESE} "【小鵝】安裝選項"
+LangString LNKFORUNINSTALL ${LANG_TRADCHINESE} "卸載小鵝"
+LangString CONFIRMATION ${LANG_TRADCHINESE} "安裝前，請先卸載舊版本的小鵝。$\n$\n按下「確定」移除舊版本，按下「取消」放棄本次安裝。"
 LangString SYSTEMVERSIONNOTOK ${LANG_TRADCHINESE} "您的系统不被支持，最低系統要求:Windows 8.1!"
 LangString AUTOCHKUPDATE ${LANG_TRADCHINESE} "自動檢查版本更新？"
 
 !insertmacro MUI_LANGUAGE "SimpChinese"
-LangString DISPLAYNAME ${LANG_SIMPCHINESE} "小狼毫输入法"
-LangString LNKFORMANUAL ${LANG_SIMPCHINESE} "【小狼毫】说明书"
-LangString LNKFORSETTING ${LANG_SIMPCHINESE} "【小狼毫】输入法设定"
-LangString LNKFORDICT ${LANG_SIMPCHINESE} "【小狼毫】用户词典管理"
-LangString LNKFORSYNC ${LANG_SIMPCHINESE} "【小狼毫】用户资料同步"
-LangString LNKFORDEPLOY ${LANG_SIMPCHINESE} "【小狼毫】重新部署"
-LangString LNKFORSERVER ${LANG_SIMPCHINESE} "小狼毫算法服务"
-LangString LNKFORUSERFOLDER ${LANG_SIMPCHINESE} "【小狼毫】用户文件夹"
-LangString LNKFORAPPFOLDER ${LANG_SIMPCHINESE} "【小狼毫】程序文件夹"
-LangString LNKFORUPDATER ${LANG_SIMPCHINESE} "【小狼毫】检查新版本"
-LangString LNKFORSETUP ${LANG_SIMPCHINESE} "【小狼毫】安装选项"
-LangString LNKFORUNINSTALL ${LANG_SIMPCHINESE} "卸载小狼毫"
-LangString CONFIRMATION ${LANG_SIMPCHINESE} '安装前，请先卸载旧版本的小狼毫。$\n$\n点击 "确定" 移除旧版本，或点击 "取消" 放弃本次安装。'
+LangString DISPLAYNAME ${LANG_SIMPCHINESE} "小鹅输入法"
+LangString LNKFORMANUAL ${LANG_SIMPCHINESE} "【小鹅】说明书"
+LangString LNKFORSETTING ${LANG_SIMPCHINESE} "【小鹅】输入法设定"
+LangString LNKFORDICT ${LANG_SIMPCHINESE} "【小鹅】用户词典管理"
+LangString LNKFORSYNC ${LANG_SIMPCHINESE} "【小鹅】用户资料同步"
+LangString LNKFORDEPLOY ${LANG_SIMPCHINESE} "【小鹅】重新部署"
+LangString LNKFORSERVER ${LANG_SIMPCHINESE} "小鹅算法服务"
+LangString LNKFORUSERFOLDER ${LANG_SIMPCHINESE} "【小鹅】用户文件夹"
+LangString LNKFORAPPFOLDER ${LANG_SIMPCHINESE} "【小鹅】程序文件夹"
+LangString LNKFORUPDATER ${LANG_SIMPCHINESE} "【小鹅】检查新版本"
+LangString LNKFORSETUP ${LANG_SIMPCHINESE} "【小鹅】安装选项"
+LangString LNKFORUNINSTALL ${LANG_SIMPCHINESE} "卸载小鹅"
+LangString CONFIRMATION ${LANG_SIMPCHINESE} '安装前，请先卸载旧版本的小鹅。$\n$\n点击 "确定" 移除旧版本，或点击 "取消" 放弃本次安装。'
 LangString SYSTEMVERSIONNOTOK ${LANG_SIMPCHINESE} "您的系統不被支持，最低系统要求:Windows 8.1!"
 LangString AUTOCHKUPDATE ${LANG_SIMPCHINESE} "自动检查版本更新？"
 

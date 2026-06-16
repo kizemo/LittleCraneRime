@@ -4,27 +4,27 @@
 
 <channel>
 
-    <title>小狼毫输入法更新</title>
+    <title>小鹅输入法更新</title>
 
     <link>https://www.aiec.fun/pinyin/appcast.xml</link>
 
-    <description>小狼毫（雾凇拼音）Appcast 更新频道</description>
+    <description>小鹅输入法 Appcast 更新频道</description>
 
     <language>zh-CN</language>
 
     <item>
 
-      <title>小狼毫 0.18.53</title>
+      <title>小鹅 1.0.1</title>
 
       <sparkle:releaseNotesLink>https://www.aiec.fun/pinyin/release-notes.html</sparkle:releaseNotesLink>
 
-      <pubDate>Fri, 13 Jun 2026 20:00:00 +0800</pubDate>
+      <pubDate>Mon, 16 Jun 2026 12:00:00 +0800</pubDate>
 
-      <enclosure url="https://www.aiec.fun/pinyin/weasel-0.18.53.0-installer.exe"
+      <enclosure url="https://www.aiec.fun/pinyin/weasel-1.0.1.0-installer.exe"
 
-                 sparkle:version="0.18.53"
+                 sparkle:version="1.0.1"
 
-                 length="20087082"
+                 length="0"
 
                  type="application/octet-stream"/>
 

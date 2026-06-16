@@ -914,7 +914,7 @@ LRESULT CustomPhraseListDialog::OnExport(WORD, WORD, HWND, BOOL&) {
     ReloadUserDictEntries();
     fs::path user_dir = WeaselUserDataPath();
     std::ofstream out(path, std::ios::binary | std::ios::trunc);
-    out << "# 小狼毫词典导出\n# encoding: utf-8\n\n";
+    out << "# 小鹅词典导出\n# encoding: utf-8\n\n";
     ExportCustomPhraseFile(out, user_dir / L"custom_phrase.txt",
                            L"固定短语 (custom_phrase.txt)");
     ExportCustomPhraseFile(out, user_dir / L"custom_phrase_double.txt",

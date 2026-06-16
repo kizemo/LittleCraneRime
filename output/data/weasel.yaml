@@ -113,11 +113,11 @@ style:
 
 # [preset_color_schemes]
 # 配色设定
-# 在小狼毫用户目录新建 preview 文件夹，将自定义皮肤的截图重命名为 color_scheme_<name>.png 放入此文件夹，可以在「输入法设定」中看到自定义皮肤效果
+# 在小鹅用户目录新建 preview 文件夹，将自定义皮肤的截图重命名为 color_scheme_<name>.png 放入此文件夹，可以在「输入法设定」中看到自定义皮肤效果
 
-# 小狼毫配色在线设计：
+# 小鹅配色在线设计：
 # [RIME 西米](https://fxliang.github.io/RimeSeeMe/)
-# [小狼毫配色详解](https://github.com/rime/weasel/wiki/定制小狼毫配色)
+# [小鹅配色详解](https://github.com/rime/weasel/wiki/定制小狼毫配色)
 
 preset_color_schemes:
   # 以下是一个配色方案示例

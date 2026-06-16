@@ -153,7 +153,7 @@ inline bool NotifyIconEntryMatchesWeasel(HKEY item) {
   size = sizeof(tip);
   if (RegGetValueW(item, NULL, L"InitialTooltip", RRF_RT_REG_SZ, NULL, tip,
                    &size) == ERROR_SUCCESS) {
-    if (wcsstr(tip, L"小狼毫") || wcsstr(tip, L"Weasel") || wcsstr(tip, L"Rime"))
+    if (wcsstr(tip, L"小狼毫") || wcsstr(tip, L"小鹅") || wcsstr(tip, L"Weasel") || wcsstr(tip, L"Rime"))
       return true;
   }
   return false;

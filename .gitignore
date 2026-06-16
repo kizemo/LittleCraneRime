@@ -31,9 +31,21 @@ output/*.txt
 output/7z.exe
 output/7z.dll
 output/Win32/
-
-# NSIS install script output
 output/installer.nsh
+
+# ============================================
+# Large data files (dictionaries, binaries)
+# ============================================
+output/data/cn_dicts/*.dict.yaml
+output/data/en_dicts/*.dict.yaml
+output/data/lua/*.db
+output/data/radical_pinyin.dict.yaml
+output/data/terra_pinyin.dict.yaml
+output/data/extra_keys/*
+
+# NSIS tools (downloaded separately)
+tools/nsis-setup.exe
+tools/nsis.zip
 
 # ============================================
 # Boost libraries (locally built)
@@ -45,7 +57,7 @@ boost_*/
 deps/
 
 # ============================================
-# librime submodule (use git submodule)
+# librime submodule (use git submodule update)
 # ============================================
 librime/
 
