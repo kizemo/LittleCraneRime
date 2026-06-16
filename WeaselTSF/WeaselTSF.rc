@@ -91,15 +91,12 @@ BEGIN
     POPUP "WeaselTray"
     BEGIN
         MENUITEM "輸入法設定 (&S)",                  ID_WEASELTRAY_SETTINGS
-        MENUITEM "用戶詞典管理 (&D)",                 ID_WEASELTRAY_DICT_MANAGEMENT
-        MENUITEM "用戶資料同步 (&N)",                 ID_WEASELTRAY_SYNC
         MENUITEM SEPARATOR
         MENUITEM "用戶文件夾 (&C)",                  ID_WEASELTRAY_USERCONFIG
         MENUITEM "程序文件夾 (&P)",                  ID_WEASELTRAY_INSTALLDIR
         MENUITEM "日誌文件夾 (&L)",                  ID_WEASELTRAY_LOGDIR
         MENUITEM SEPARATOR
         MENUITEM "幫助文檔 (&H)",                   ID_WEASELTRAY_WIKI
-        MENUITEM "參加討論 (&J)",                   ID_WEASELTRAY_FORUM
         MENUITEM SEPARATOR
         MENUITEM "檢查新版本 (&U)",                  ID_WEASELTRAY_CHECKUPDATE
         MENUITEM "重新部署 (&R)",                   ID_WEASELTRAY_DEPLOY
@@ -114,15 +111,12 @@ BEGIN
     POPUP "WeaselTray"
     BEGIN
         MENUITEM "输入法设定 (&S)",                  ID_WEASELTRAY_SETTINGS
-        MENUITEM "用户词典管理 (&D)",                 ID_WEASELTRAY_DICT_MANAGEMENT
-        MENUITEM "用户资料同步 (&N)",                 ID_WEASELTRAY_SYNC
         MENUITEM SEPARATOR
         MENUITEM "用户文件夹 (&C)",                  ID_WEASELTRAY_USERCONFIG
         MENUITEM "程序文件夹 (&P)",                  ID_WEASELTRAY_INSTALLDIR
         MENUITEM "日志文件夹 (&L)",                  ID_WEASELTRAY_LOGDIR
         MENUITEM SEPARATOR
         MENUITEM "帮助文档 (&H)",                   ID_WEASELTRAY_WIKI
-        MENUITEM "参加讨论 (&J)",                   ID_WEASELTRAY_FORUM
         MENUITEM SEPARATOR
         MENUITEM "检查新版本 (&U)",                  ID_WEASELTRAY_CHECKUPDATE
         MENUITEM "重新部署 (&R)",                   ID_WEASELTRAY_DEPLOY

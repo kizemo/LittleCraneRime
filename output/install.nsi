@@ -377,7 +377,7 @@ program_files:
   WriteRegStr HKLM "${REG_UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegStr HKLM "${REG_UNINST_KEY}" "Publisher" "式恕堂"
   WriteRegStr HKLM "${REG_UNINST_KEY}" "URLInfoAbout" "https://rime.im/"
-  WriteRegStr HKLM "${REG_UNINST_KEY}" "HelpLink" "https://rime.im/docs/"
+  WriteRegStr HKLM "${REG_UNINST_KEY}" "HelpLink" "https://www.aiec.fun/%e5%bc%83%e7%94%a8%e6%90%9c%e7%8b%97%ef%bc%8c%e6%8b%a5%e6%8a%b1%e4%bc%98%e5%8c%96%e7%89%88rime%ef%bc%9a%e6%88%91%e7%9a%84%e8%be%93%e5%85%a5%e6%b3%95%e6%8d%a2%e8%a1%80%e4%b9%8b%e6%97%85/"
   WriteRegDWORD HKLM "${REG_UNINST_KEY}" "NoModify" 1
   WriteRegDWORD HKLM "${REG_UNINST_KEY}" "NoRepair" 1
   WriteUninstaller "$INSTDIR\uninstall.exe"

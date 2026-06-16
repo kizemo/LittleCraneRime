@@ -414,10 +414,14 @@ void WeaselTSF::_HandleLangBarMenuSelect(UINT wID) {
       explore(WeaselLogPath().wstring());
       break;
     case ID_WEASELTRAY_WIKI:
-      open(L"https://rime.im/docs/");
+      open(L"https://www.aiec.fun/"
+           L"%e5%bc%83%e7%94%a8%e6%90%9c%e7%8b%97%ef%bc%8c"
+           L"%e6%8b%a5%e6%8a%b1%e4%bc%98%e5%8c%96%e7%89%88rime"
+           L"%ef%bc%9a%e6%88%91%e7%9a%84%e8%be%93%e5%85%a5%e6"
+           L"%b3%95%e6%8d%a2%e8%a1%80%e4%b9%8b%e6%97%85/");
       break;
     case ID_WEASELTRAY_FORUM:
-      open(L"https://rime.im/discuss/");
+      // "参加讨论" menu item removed by user request (rebranding: 小鹤)
       break;
     default: {
       wchar_t logbuf[64];
