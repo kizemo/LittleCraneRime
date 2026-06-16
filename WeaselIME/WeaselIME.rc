@@ -74,23 +74,23 @@ BEGIN
         BLOCK "040404b0"
         BEGIN
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鵝輸入法"
+            VALUE "FileDescription", "小鶴輸入法"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "Weasel"
             VALUE "LegalCopyright", "式恕堂 版權所無"
             VALUE "OriginalFilename", "weasel.ime"
-            VALUE "ProductName", "小鵝"
+            VALUE "ProductName", "小鶴"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
         BLOCK "080404b0"
         BEGIN
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鵝輸入法"
+            VALUE "FileDescription", "小鶴輸入法"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "Weasel"
             VALUE "LegalCopyright", "式恕堂 版權所無"
             VALUE "OriginalFilename", "weasel.ime"
-            VALUE "ProductName", "小鵝"
+            VALUE "ProductName", "小鶴"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
     END

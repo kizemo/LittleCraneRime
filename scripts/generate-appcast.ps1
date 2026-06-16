@@ -26,9 +26,7 @@ $firstItem = [regex]::Replace($firstItem, 'weasel-[0-9.]+-installer\.exe',
   "weasel-$ProductVersion-installer.exe")
 $firstItem = [regex]::Replace($firstItem, 'sparkle:version="[0-9.]+"',
   "sparkle:version=`"$WeaselVersion`"")
-$firstItem = [regex]::Replace($firstItem, '(<title>小鹅 )[0-9.]+(</title>)',
-  "`${1}$WeaselVersion`${2}")
-$firstItem = [regex]::Replace($firstItem, '(<title>小狼毫 )[0-9.]+(</title>)',
+$firstItem = [regex]::Replace($firstItem, '(<title>小鹤 )[0-9.]+(</title>)',
   "`${1}$WeaselVersion`${2}")
 
 $installer = Get-ChildItem -Path $releaseDir -Filter "weasel-$ProductVersion-installer.exe" -ErrorAction SilentlyContinue |

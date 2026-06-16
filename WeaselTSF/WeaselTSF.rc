@@ -152,24 +152,24 @@ BEGIN
         BEGIN
             VALUE "Comments", "Powered by RIME | 中州韵输入法引擎"
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鹅TSF"
+            VALUE "FileDescription", "小鹤TSF"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "WeaselTSF"
             VALUE "LegalCopyright", "式恕堂 版权所无"
             VALUE "OriginalFilename", FILE_NAME
-            VALUE "ProductName", "小鹅"
+            VALUE "ProductName", "小鹤"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
         BLOCK "040404b0"
         BEGIN
             VALUE "Comments", "Powered by RIME | 中州韻輸入法引擎"
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鵝TSF"
+            VALUE "FileDescription", "小鶴TSF"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "WeaselTSF"
             VALUE "LegalCopyright", "式恕堂 版權所無"
             VALUE "OriginalFilename", FILE_NAME
-            VALUE "ProductName", "小鵝"
+            VALUE "ProductName", "小鶴"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
         BLOCK "040904b0"

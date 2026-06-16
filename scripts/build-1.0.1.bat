@@ -1,7 +1,7 @@
 @echo off
-REM Build script for weasel 1.0.1.0 (XiaoE)
+REM Build script for weasel 1.0.1.0 (XiaoHe)
 REM 新版本号格式：1.0.1.0（替代 0.18.x.x）
-REM 产品名：小鹅（XiaoE）
+REM 产品名：小鹤（XiaoHe）
 
 setlocal
 

@@ -76,7 +76,7 @@ bool CustomPhraseDialog::ValidateInput(std::wstring& code,
 LRESULT CustomPhraseDialog::OnOK(WORD, WORD, HWND, BOOL&) {
   if (!ValidateInput(code_, phrase_)) {
     ::MessageBoxW(m_hWnd, L"请填写有效的编码和短语内容。\n编码仅支持字母、数字、下划线和连字符。",
-                  L"【小鹅】自定义短语", MB_OK | MB_ICONWARNING);
+                  L"【小鹤】自定义短语", MB_OK | MB_ICONWARNING);
     return 0;
   }
   EndDialog(IDOK);

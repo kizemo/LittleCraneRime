@@ -64,10 +64,10 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_STR_WEASEL          "【小鹅】"
+    IDS_STR_WEASEL          "【小鹤】"
     IDS_STR_SAD             ":-("
     IDS_STR_HAPPY           ":-)"
-    IDS_STR_NOT_REGULAR     "小鹅不是这般用法"
+    IDS_STR_NOT_REGULAR     "小鹤不是这般用法"
     IDS_STR_DEPLOYING_RESTARTREQ "正在执行另一项部署任务，方才所做的修改将在输入法再次启动后生效。"
     IDS_STR_DEPLOYING_WAIT  "正在执行另一项部署任务，请稍候再试。"
     IDS_STR_SEL_EXPORT_DICT_NAME "请在左列选择要导出的词典名称。"
@@ -93,7 +93,7 @@ BEGIN
     IDS_STR_RECORD_COUNT    "条记录。"
     IDS_STR_DICT_SNAPSHOT   "词典快照"
     IDS_STR_KCSS_DICT_SNAPSHOT "KCSS格式词典快照"
-    IDS_STR_HELP           "小鹅部署应用的命令行参数：\n\n/?  - 显示帮助信息\n/help  - 显示帮助信息\n/deploy  - 更新工作区\n/dict  - 管理词典\n/sync  - 同步用户数据\n/install  - 安装小鹅（初始部署）"
+    IDS_STR_HELP           "小鹤部署应用的命令行参数：\n\n/?  - 显示帮助信息\n/help  - 显示帮助信息\n/deploy  - 更新工作区\n/dict  - 管理词典\n/sync  - 同步用户数据\n/install  - 安装小鹤（初始部署）"
 END
 
 #endif    // Chinese (Simplified) resources
@@ -113,13 +113,13 @@ LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 
 IDD_SWITCHER_SETTING DIALOGEX 0, 0, 316, 190
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】方案选单设定"
+CAPTION "【小鹤】方案选单设定"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "请勾选所需的输入方案：",IDC_STATIC1,7,7,89,8
     CONTROL         "",IDC_SCHEMA_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,21,126,103
     LTEXT           "选中列表中的输入方案以查看简介",IDC_SCHEMA_DESCRIPTION,144,21,165,103
-    LTEXT           " 在小鹅里,以下快捷键可唤出方案菜单,以切换模式或选用其他输入方案。",IDC_STATIC1,7,132,273,8
+    LTEXT           " 在小鹤里,以下快捷键可唤出方案菜单,以切换模式或选用其他输入方案。",IDC_STATIC1,7,132,273,8
     EDITTEXT        IDC_HOTKEYS,7,147,126,14,ES_AUTOHSCROLL
     PUSHBUTTON      "获取更多输入方案...",IDC_GET_SCHEMATA,7,169,90,14
     DEFPUSHBUTTON   "中",IDOK,133,169,50,14
@@ -127,7 +127,7 @@ END
 
 IDD_STYLE_SETTING DIALOGEX 0, 0, 316, 190
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】界面风格设定"
+CAPTION "【小鹤】界面风格设定"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "请选取你最喜欢的配色：",IDC_STATIC1,7,7,81,8
@@ -139,7 +139,7 @@ END
 
 IDD_DICT_MANAGEMENT DIALOGEX 0, 0, 316, 185
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】用户词典管理"
+CAPTION "【小鹤】用户词典管理"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "用户词典列表：",IDC_STATIC1,7,7,57,8
@@ -154,7 +154,7 @@ END
 
 IDD_CUSTOM_PHRASE DIALOGEX 0, 0, 320, 200
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】自定义短语"
+CAPTION "【小鹤】自定义短语"
 FONT 9, "Microsoft YaHei UI", 400, 0, 0x1
 BEGIN
     LTEXT           "键盘字母组合：",IDC_STATIC1,12,14,80,10
@@ -253,12 +253,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Powered by RIME | 中州韵输入法引擎"
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鹅部署应用"
+            VALUE "FileDescription", "小鹤部署应用"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "WeaselDeployer"
             VALUE "LegalCopyright", "式恕堂 版权所无"
             VALUE "OriginalFilename", "WeaselDeployer"
-            VALUE "ProductName", "小鹅"
+            VALUE "ProductName", "小鹤"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
     END
@@ -286,7 +286,7 @@ LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
 
 IDD_STYLE_SETTING DIALOGEX 0, 0, 316, 190
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】介面風格設定"
+CAPTION "【小鹤】介面風格設定"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "請選取你喜歡的配色：",IDC_STATIC1,7,7,81,8
@@ -298,13 +298,13 @@ END
 
 IDD_SWITCHER_SETTING DIALOGEX 0, 0, 316, 190
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】方案選單設定"
+CAPTION "【小鹤】方案選單設定"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "請勾選所需的輸入方案：",IDC_STATIC1,7,7,89,8
     CONTROL         "",IDC_SCHEMA_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,21,126,103
     LTEXT           "選中列表中的輸入方案以查看簡介",IDC_SCHEMA_DESCRIPTION,144,21,165,103
-    LTEXT           "在小鹅裏，以下快捷鍵可喚出方案選單，以切換模式或選用其他輸入方案。",IDC_STATIC1,7,132,273,8
+    LTEXT           "在小鹤裏，以下快捷鍵可喚出方案選單，以切換模式或選用其他輸入方案。",IDC_STATIC1,7,132,273,8
     EDITTEXT        IDC_HOTKEYS,7,147,126,14,ES_AUTOHSCROLL
     PUSHBUTTON      "獲取更多輸入方案...",IDC_GET_SCHEMATA,7,169,90,14
     DEFPUSHBUTTON   "中",IDOK,133,169,50,14
@@ -312,7 +312,7 @@ END
 
 IDD_DICT_MANAGEMENT DIALOGEX 0, 0, 316, 185
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】用戶詞典管理"
+CAPTION "【小鹤】用戶詞典管理"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "用戶詞典列表：",IDC_STATIC1,7,7,57,8
@@ -386,12 +386,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Powered by RIME | 中州韻輸入法引擎"
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鹅部署應用"
+            VALUE "FileDescription", "小鹤部署應用"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "WeaselDeployer"
             VALUE "LegalCopyright", "式恕堂 版權所無"
             VALUE "OriginalFilename", "WeaselDeployer"
-            VALUE "ProductName", "小鹅"
+            VALUE "ProductName", "小鹤"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
     END
@@ -410,10 +410,10 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_STR_WEASEL          "【小鹅】"
+    IDS_STR_WEASEL          "【小鹤】"
     IDS_STR_SAD             ":-("
     IDS_STR_HAPPY           ":-)"
-    IDS_STR_NOT_REGULAR     "小鹅不是這般用法"
+    IDS_STR_NOT_REGULAR     "小鹤不是這般用法"
     IDS_STR_DEPLOYING_RESTARTREQ "正在執行另一項部署任務，方纔所做的修改將在輸入法再次啓動後生效。"
     IDS_STR_DEPLOYING_WAIT  "正在執行另一項部署任務，請稍候再試。"
     IDS_STR_SEL_EXPORT_DICT_NAME "請在左列選擇要導出的詞典名稱。"
@@ -439,7 +439,7 @@ BEGIN
     IDS_STR_RECORD_COUNT    "條記錄。"
     IDS_STR_DICT_SNAPSHOT   "詞典快照"
     IDS_STR_KCSS_DICT_SNAPSHOT "KCSS格式詞典快照"
-    IDS_STR_HELP            "小鹅部署應用的命令行參數：\n\n/?  - 顯示幫助信息\n/help  - 顯示幫助信息\n/deploy  - 更新工作區\n/dict  - 管理詞典\n/sync  - 同步用戶數據\n/install  - 安裝小鹅（初始部署）"
+    IDS_STR_HELP            "小鹤部署應用的命令行參數：\n\n/?  - 顯示幫助信息\n/help  - 顯示幫助信息\n/deploy  - 更新工作區\n/dict  - 管理詞典\n/sync  - 同步用戶數據\n/install  - 安裝小鹤（初始部署）"
 END
 
 #endif    // Chinese (Traditional, Taiwan) resources

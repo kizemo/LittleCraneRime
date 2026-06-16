@@ -59,7 +59,7 @@ END
 
 IDD_INSTALL_OPTIONS DIALOGEX 0, 0, 235, 138
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】安装选项"
+CAPTION "【小鹤】安装选项"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     GROUPBOX        "输入语言",IDC_STATIC,7,7,150,42
@@ -98,8 +98,8 @@ BEGIN
     IDS_STR_ERRREGIMEWRITESVREXE "无法写入注册表键值 ServerExecutable"
     IDS_STR_INORUN_FAILED   "安装/卸载失败"
     IDS_STR_ERRWRITEWEASELROOT "无法写入 WeaselRoot"
-    IDS_STR_INSTALL_SUCCESS_INFO "可以使【小鹅】写字了 :)"
-    IDS_STR_UNINSTALL_SUCCESS_INFO "小鹅 :)"
+    IDS_STR_INSTALL_SUCCESS_INFO "可以使【小鹤】写字了 :)"
+    IDS_STR_UNINSTALL_SUCCESS_INFO "小鹤 :)"
 END
 
 STRINGTABLE
@@ -108,7 +108,7 @@ BEGIN
     IDS_STR_ERR_WRITE_HANT  "无法写入 Hant"
     IDS_STR_MODIFY_SUCCESS_INFO "修改用户文件夹位置成功:)"
     IDS_STR_MODIFY_SUCCESS_CAP "修改成功"
-    IDS_STR_HELP "小鹅安装应用的命令行参数：\n\n/?  - 显示帮助信息\n/help  - 显示帮助信息\n/u  - 卸载小鹅\n/i  - 安装小鹅\n/s  - 安装小鹅（简体中文）\n/t  - 安装小鹅（繁体中文）\n/ls  - 设置小鹅语言为简体中文\n/lt  - 设置小鹅语言为繁体中文\n/le  - 设置小鹅语言为英文\n/eu  - 启用自动检查更新\n/du  - 禁用自动检查更新\n/toggleime  - 切换IME开启/关闭(ctrl+space)\n/toggleascii  - 切换ASCII开启/关闭(ctrl+space)\n/testing  - 设置更新通道为测试版\n/release  - 设置更新通道为正式版\n/userdir:<dir>  - 设置用户文件夹位置\n"
+    IDS_STR_HELP "小鹤安装应用的命令行参数：\n\n/?  - 显示帮助信息\n/help  - 显示帮助信息\n/u  - 卸载小鹤\n/i  - 安装小鹤\n/s  - 安装小鹤（简体中文）\n/t  - 安装小鹤（繁体中文）\n/ls  - 设置小鹤语言为简体中文\n/lt  - 设置小鹤语言为繁体中文\n/le  - 设置小鹤语言为英文\n/eu  - 启用自动检查更新\n/du  - 禁用自动检查更新\n/toggleime  - 切换IME开启/关闭(ctrl+space)\n/toggleascii  - 切换ASCII开启/关闭(ctrl+space)\n/testing  - 设置更新通道为测试版\n/release  - 设置更新通道为正式版\n/userdir:<dir>  - 设置用户文件夹位置\n"
 END
 
 #endif    // Chinese (Simplified, China) resources
@@ -154,7 +154,7 @@ END
 
 IDD_INSTALL_OPTIONS DIALOGEX 0, 0, 235, 138
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "【小鹅】安装選項"
+CAPTION "【小鹤】安装選項"
 FONT 9, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     GROUPBOX        "輸入語言",IDC_STATIC,7,7,150,42
@@ -193,8 +193,8 @@ BEGIN
     IDS_STR_ERRREGIMEWRITESVREXE "無法寫入註冊表鍵值 ServerExecutable"
     IDS_STR_INORUN_FAILED   "安装/卸載失败"
     IDS_STR_ERRWRITEWEASELROOT "無法寫入 WeaselRoot"
-    IDS_STR_INSTALL_SUCCESS_INFO "可以使【小鹅】寫字了 :)"
-    IDS_STR_UNINSTALL_SUCCESS_INFO "小鹅 :)"
+    IDS_STR_INSTALL_SUCCESS_INFO "可以使【小鹤】寫字了 :)"
+    IDS_STR_UNINSTALL_SUCCESS_INFO "小鹤 :)"
 END
 
 STRINGTABLE
@@ -203,7 +203,7 @@ BEGIN
     IDS_STR_ERR_WRITE_HANT  "無法寫入 Hant"
     IDS_STR_MODIFY_SUCCESS_INFO "修改用戶資料夾位置成功:)"
     IDS_STR_MODIFY_SUCCESS_CAP "修改成功"
-    IDS_STR_HELP "小鹅安裝應用的命令行參數：\n\n/?  - 顯示幫助信息\n/help  - 顯示幫助信息\n/u  - 卸載小鹅\n/i  - 安裝小鹅\n/s  - 安裝小鹅（簡體中文）\n/t  - 安裝小鹅（繁體中文）\n/ls  - 設定小鹅語言為簡體中文\n/lt  - 設定小鹅語言為繁體中文\n/le  - 設定小鹅語言為英文\n/eu  - 啟用自動檢查更新\n/du  - 禁用自動檢查更新\n/toggleime  - 切換IME開啟/關閉(ctrl+space)\n/toggleascii  - 切換ASCII開啟/關閉(ctrl+space)\n/testing  - 設定更新通道為測試版\n/release  - 設定更新通道為正式版\n/userdir:<dir>  - 設定用戶資料夾位置\n"
+    IDS_STR_HELP "小鹤安裝應用的命令行參數：\n\n/?  - 顯示幫助信息\n/help  - 顯示幫助信息\n/u  - 卸載小鹤\n/i  - 安裝小鹤\n/s  - 安裝小鹤（簡體中文）\n/t  - 安裝小鹤（繁體中文）\n/ls  - 設定小鹤語言為簡體中文\n/lt  - 設定小鹤語言為繁體中文\n/le  - 設定小鹤語言為英文\n/eu  - 啟用自動檢查更新\n/du  - 禁用自動檢查更新\n/toggleime  - 切換IME開啟/關閉(ctrl+space)\n/toggleascii  - 切換ASCII開啟/關閉(ctrl+space)\n/testing  - 設定更新通道為測試版\n/release  - 設定更新通道為正式版\n/userdir:<dir>  - 設定用戶資料夾位置\n"
 END
 
 #endif    // Chinese (Traditional, Taiwan) resources
@@ -323,12 +323,12 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "FileDescription", "小鹅安裝應用"
+            VALUE "FileDescription", "小鹤安裝應用"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "WeaselSetup"
             VALUE "LegalCopyright", "式恕堂 版權所無"
             VALUE "OriginalFilename", "WeaselSetup"
-            VALUE "ProductName", "小鹅"
+            VALUE "ProductName", "小鹤"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
     END

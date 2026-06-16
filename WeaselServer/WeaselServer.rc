@@ -98,12 +98,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Powered by RIME | 中州韵输入法引擎"
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鹅算法服务"
+            VALUE "FileDescription", "小鹤算法服务"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "WeaselServer"
             VALUE "LegalCopyright", "式恕堂 版权所无"
             VALUE "OriginalFilename", "WeaselServer.exe"
-            VALUE "ProductName", "小鹅"
+            VALUE "ProductName", "小鹤"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
     END
@@ -208,12 +208,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Powered by RIME | 中州韻輸入法引擎"
             VALUE "CompanyName", "式恕堂"
-            VALUE "FileDescription", "小鵝算法服務"
+            VALUE "FileDescription", "小鶴算法服務"
             VALUE "FileVersion", FILE_VERSION
             VALUE "InternalName", "WeaselServer"
             VALUE "LegalCopyright", "式恕堂 版權所無"
             VALUE "OriginalFilename", "WeaselServer.exe"
-            VALUE "ProductName", "小鵝"
+            VALUE "ProductName", "小鶴"
             VALUE "ProductVersion", STRZ(PRODUCT_VERSION)
         END
     END

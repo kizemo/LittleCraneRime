@@ -1445,7 +1445,7 @@ C谱号	C谱号 𝄡
 rime	rime 㞢
 中州韵	中州韵 Rime
 鼠须管	鼠须管 Squirrel
-小狼毫	小狼毫 Weasel
+小鹤	小鹤 Crane
 仓输入法	仓输入法 Hamster
 纳粹	纳粹 卐
 进击的巨人	进击的巨人 進撃の巨人

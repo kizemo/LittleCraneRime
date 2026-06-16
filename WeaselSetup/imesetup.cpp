@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include <string>
 #include <vector>
 #include <msctf.h>
@@ -476,7 +476,7 @@ int register_ime(const std::wstring& ime_path,
       if (ret != ERROR_SUCCESS)
         continue;
 
-      // 小狼毫?
+      // 小鹤?
       if (_wcsicmp(imeFile, L"weasel.ime") == 0) {
         DWORD value;
         swscanf_s(subKey, L"%x", &value);
