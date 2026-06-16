@@ -18,6 +18,37 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+//
+// APPCAST (language-neutral; required for manual update from any locale)
+//
+// These resources MUST live OUTSIDE any LANGUAGE block. If they were
+// placed inside the SimpChinese block (as they used to be), the manual
+// "检查新版本" menu item would fail on Traditional Chinese / English
+// Windows: FindResourceA() would return NULL because the custom
+// resource is only present in the 0x0804 (SimpChinese) resource table.
+//
+
+FEEDURL APPCAST
+BEGIN
+    "https://www.aiec.fun/pinyin/appcast.xml\0"
+END
+
+MANUALUPDATEFEEDURL APPCAST
+BEGIN
+    "https://www.aiec.fun/pinyin/appcast.xml\0"
+END
+
+TESTINGFEEDURL APPCAST
+BEGIN
+    "https://www.aiec.fun/pinyin/appcast.xml\0"
+END
+
+TESTINGMANUALUPDATEFEEDURL APPCAST
+BEGIN
+    "https://www.aiec.fun/pinyin/appcast.xml\0"
+END
+
+/////////////////////////////////////////////////////////////////////////////
 // Chinese (Simplified, China) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
@@ -48,31 +79,6 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// APPCAST
-//
-
-FEEDURL APPCAST 
-BEGIN
-    "https://www.aiec.fun/pinyin/appcast.xml\0"
-END
-
-MANUALUPDATEFEEDURL APPCAST 
-BEGIN
-    "https://www.aiec.fun/pinyin/appcast.xml\0"
-END
-
-TESTINGFEEDURL APPCAST
-BEGIN 
-    "https://www.aiec.fun/pinyin/appcast.xml\0"
-END
-
-TESTINGMANUALUPDATEFEEDURL APPCAST 
-BEGIN 
-    "https://www.aiec.fun/pinyin/appcast.xml\0"
-END
 
 /////////////////////////////////////////////////////////////////////////////
 //
